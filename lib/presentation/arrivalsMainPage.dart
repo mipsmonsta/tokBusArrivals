@@ -112,7 +112,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                   case ArrivalsQueryStateSuccess:
                     var services =
                         (state as ArrivalsQueryStateSuccess).services;
-                    print(services);
+                    //print(services);
                     resultWidget = getListViewBasedOnServices(services);
                     break;
                   case ArrivalsQueryStateEmpty:
