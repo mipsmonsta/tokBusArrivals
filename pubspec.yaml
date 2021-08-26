@@ -28,6 +28,7 @@ dependencies:
     path: packages/meta_bus_arrivals_api #using own unpublished package
   bloc: ^7.1.0
   flutter_bloc: ^7.2.0
+  intl: ^0.17.0
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:meta_bus_arrivals_api/meta_bus_arrivals_api.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryBloc.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryEvent.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryState.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 class ArrivalsMainPage extends StatefulWidget {
   ArrivalsMainPage({Key? key}) : super(key: key);
@@ -25,6 +28,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
   @override
   void initState() {
     super.initState();
+    initializeDateFormatting('en_SG', null);
     _bsController = TextEditingController();
     _bsController.addListener(_busStopCodeListener);
   }
@@ -32,6 +36,34 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
   void _busStopCodeListener() {
     var bloc = BlocProvider.of<ArrivalsQueryBloc>(context);
     bloc.add(ArrivalsSeekingBusStopCodeEvent(_bsController.text));
+  }
+
+  Widget getListViewBasedOnServices(List<Service> services) {
+    return Expanded(
+      child: ListView.builder(
+          itemBuilder: (buildContext, index) {
+            Service service = services[index];
+            String time1 = service.bus1.estimatedArrival == null
+                ? ""
+                : DateFormat.Hm().format(
+                    service.bus1.estimatedArrival!.add(Duration(hours: 8)));
+            String time2 = service.bus1.estimatedArrival == null
+                ? ""
+                : DateFormat.Hm().format(
+                    service.bus2.estimatedArrival!.add(Duration(hours: 8)));
+            String time3 = service.bus1.estimatedArrival == null
+                ? ""
+                : DateFormat.Hm().format(
+                    service.bus3.estimatedArrival!.add(Duration(hours: 8)));
+
+            return Center(
+                child: ListTile(
+                    leading: Icon(Icons.bus_alert),
+                    title: Text(service.number),
+                    subtitle: Text("Next Buses in: $time1 $time2 $time3")));
+          },
+          itemCount: services.length),
+    );
   }
 
   @override
@@ -78,7 +110,10 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                     break;
 
                   case ArrivalsQueryStateSuccess:
-                    resultWidget = Center(child: Text("Success"));
+                    var services =
+                        (state as ArrivalsQueryStateSuccess).services;
+                    print(services);
+                    resultWidget = getListViewBasedOnServices(services);
                     break;
                   case ArrivalsQueryStateEmpty:
                   default:

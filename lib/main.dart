@@ -27,8 +27,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: BlocProvider<ArrivalsQueryBloc>(
-      create: (context) => ArrivalsQueryBloc(MetaBusArrivalsApiClient()),
-      child: ArrivalsMainPage(),
+        create: (context) => ArrivalsQueryBloc(MetaBusArrivalsApiClient()),
+        child: ArrivalsMainPage(),
       ),
     );
   }

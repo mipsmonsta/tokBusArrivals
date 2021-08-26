@@ -244,10 +244,9 @@ void main() {
         expect(
             actualList,
             isA<List<Service>>()
-                .having(
-                    (l) => l[0].bus1.estimatedArrival.isNotEmpty, 'bus1', true)
-                .having((l) => l[0].bus2.estimatedArrival.isEmpty, 'bus2', true)
-                .having((l) => l[1].bus3.estimatedArrival.isEmpty, 'bus3', true)
+                .having((l) => l[0].bus1.estimatedArrival != null, 'bus1', true)
+                .having((l) => l[0].bus2.estimatedArrival == null, 'bus2', true)
+                .having((l) => l[1].bus3.estimatedArrival == null, 'bus3', true)
                 .having((l) => l[0].busOperator, 'busOperator', 'SMRT')
                 .having((l) => l[0].number, 'bus service number', '176'));
       });

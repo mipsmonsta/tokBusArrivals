@@ -1,12 +1,12 @@
 //http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=
 
 class NextBus {
-  String estimatedArrival = ""; //2017-04-29T07:20:24+08:00
+  DateTime? estimatedArrival; //2017-04-29T07:20:24+08:00
   NextBus(this.estimatedArrival);
 
   NextBus.fromJson(Map<String, dynamic> json) {
     if (json.isNotEmpty && json.containsKey('EstimatedArrival'))
-      this.estimatedArrival = json['EstimatedArrival'];
+      this.estimatedArrival = DateTime.parse(json['EstimatedArrival']);
   }
 
   Map<String, dynamic> toJson() {
@@ -29,6 +29,10 @@ class Service {
       required this.bus1,
       required this.bus2,
       required this.bus3});
+
+  String toString() {
+    return "Service {number: $number, bus operator: $busOperator}";
+  }
 
   Service.fromJson(Map<String, dynamic> json)
       : number = json["ServiceNo"],

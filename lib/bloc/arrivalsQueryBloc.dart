@@ -19,7 +19,11 @@ class ArrivalsQueryBloc extends Bloc<ArrivalsQueryEvent, ArrivalsQueryState> {
         List<Service> services;
         try {
           services = await apiClient.getBusArrivals(busStopCode);
-          yield ArrivalsQueryStateSuccess(services, busStopCode);
+          if (services.isNotEmpty) {
+            yield ArrivalsQueryStateSuccess(services, busStopCode);
+          } else {
+            yield ArrivalsQueryStateEmpty();
+          }
         } catch (exception) {
           if (exception is BusArrivalsNotFoundFailure) {
             yield ArrivalsQueryStateEmpty();
