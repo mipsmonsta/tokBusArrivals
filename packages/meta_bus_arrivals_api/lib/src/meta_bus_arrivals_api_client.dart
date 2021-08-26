@@ -17,12 +17,14 @@ class MetaBusArrivalsApiClient {
       : _httpClient = httpClient ?? http.Client();
 
   Future<List<Service>> getBusArrivals(String code) async {
-    final arrivalsRequest = Uri.http(_baseUrl, '/ltaodataservice/BusArrivalv2?',
-        {'BusStopCode': code, 'AccountKey': apiKey});
+    final arrivalsRequest = Uri.http(
+        _baseUrl, '/ltaodataservice/BusArrivalv2', {'BusStopCode': code});
 
-    final arrivalsResponse = await _httpClient.get(arrivalsRequest);
+    final arrivalsResponse =
+        await _httpClient.get(arrivalsRequest, headers: {'AccountKey': apiKey});
 
     if (arrivalsResponse.statusCode != 200) {
+      print(arrivalsResponse.statusCode);
       throw BusArrivalsRequestFailure();
     }
 

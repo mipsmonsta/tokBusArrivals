@@ -10,6 +10,8 @@ class MockResponse extends Mock implements http.Response {}
 
 class FakeUri extends Fake implements Uri {}
 
+// class FakeMap extends Fake implements Map {}
+
 void main() {
   group('MetaBusArrivalsApiClient', () {
     late http.Client httpClient;
@@ -17,6 +19,7 @@ void main() {
 
     setUpAll(() {
       registerFallbackValue<Uri>(FakeUri());
+      //registerFallbackValue<Map>(FakeMap());
     });
 
     setUp(() {
@@ -43,18 +46,20 @@ void main() {
         when(() => httpClient.get(any())).thenAnswer((_) async => response);
 
         try {
-          await metaBusArrivalsApiClient.getBusArrivals(busStopCode);
+          await metaBusArrivalsApiClient
+              .getBusArrivals(busStopCode); //api will invoke httpClient.get()
         } catch (_) {}
-        verify(() => httpClient.get(Uri.http(
-            "datamall2.mytransport.sg",
-            '/ltaodataservice/BusArrivalv2?',
-            {'BusStopCode': busStopCode, 'AccountKey': apiKey}))).called(1);
+        verify(() => httpClient.get(
+            Uri.http("datamall2.mytransport.sg",
+                '/ltaodataservice/BusArrivalv2', {'BusStopCode': busStopCode}),
+            headers: {'AccountKey': apiKey})).called(1);
       });
 
       test('throws BusArrivalsRequestFailure on non-200 response', () async {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(400);
-        when(() => httpClient.get(any())).thenAnswer((_) async => response);
+        when(() => httpClient.get(any(), headers: any(named: "headers")))
+            .thenAnswer((_) async => response);
         expect(
             () async =>
                 await metaBusArrivalsApiClient.getBusArrivals(busStopCode),
@@ -65,7 +70,8 @@ void main() {
         final response = MockResponse();
         when(() => response.statusCode).thenReturn(200);
         when(() => response.body).thenReturn('{}');
-        when(() => httpClient.get(any())).thenAnswer((_) async => response);
+        when(() => httpClient.get(any(), headers: any(named: "headers")))
+            .thenAnswer((_) async => response);
         expect(
             () async =>
                 await metaBusArrivalsApiClient.getBusArrivals(busStopCode),
@@ -155,7 +161,8 @@ void main() {
     ]
 }
 ''');
-        when(() => httpClient.get(any())).thenAnswer((_) async => response);
+        when(() => httpClient.get(any(), headers: any(named: "headers")))
+            .thenAnswer((_) async => response);
         final actualList =
             await metaBusArrivalsApiClient.getBusArrivals(busStopCode);
         expect(actualList, isA<List<Service>>());
@@ -230,15 +237,19 @@ void main() {
     ]
 }
 ''');
-        when(() => httpClient.get(any())).thenAnswer((_) async => response);
+        when(() => httpClient.get(any(), headers: any(named: "headers")))
+            .thenAnswer((_) async => response);
         final actualList =
             await metaBusArrivalsApiClient.getBusArrivals(busStopCode);
         expect(
             actualList,
             isA<List<Service>>()
+                .having(
+                    (l) => l[0].bus1.estimatedArrival.isNotEmpty, 'bus1', true)
                 .having((l) => l[0].bus2.estimatedArrival.isEmpty, 'bus2', true)
                 .having((l) => l[1].bus3.estimatedArrival.isEmpty, 'bus3', true)
-                .having((l) => l[0].busOperator, 'busOperator', 'SMRT'));
+                .having((l) => l[0].busOperator, 'busOperator', 'SMRT')
+                .having((l) => l[0].number, 'bus service number', '176'));
       });
     });
   });
