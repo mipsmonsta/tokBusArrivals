@@ -24,7 +24,6 @@ class MetaBusArrivalsApiClient {
         await _httpClient.get(arrivalsRequest, headers: {'AccountKey': apiKey});
 
     if (arrivalsResponse.statusCode != 200) {
-      print(arrivalsResponse.statusCode);
       throw BusArrivalsRequestFailure();
     }
 

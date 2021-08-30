@@ -6,6 +6,8 @@ import 'package:tokbusarrival/bloc/arrivalsQueryBloc.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryEvent.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryState.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
+import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
 
 class ArrivalsMainPage extends StatefulWidget {
   ArrivalsMainPage({Key? key}) : super(key: key);
@@ -38,23 +40,52 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
     bloc.add(ArrivalsSeekingBusStopCodeEvent(_bsController.text));
   }
 
+  String _createSpeechFromServices(List<Service> services) {
+    List<String> svcAnnouncements = List.generate(services.length, (index) {
+      if (services[index].bus1 != null) {
+        var number = services[index].number;
+        var relativeMin = services[index]
+            .bus1!
+            .estimatedArrival
+            .difference(DateTime.now())
+            .inMinutes;
+        String announcement = "";
+        if (relativeMin == 0) {
+          announcement = "Service $number has arrived.";
+        } else if (relativeMin < 0) {
+          int leftMin = -1 * relativeMin;
+          announcement = "Service $number has left about $leftMin ago.";
+        } else {
+          announcement =
+              "Service $number will arrived in $relativeMin minutes.";
+        }
+
+        return announcement;
+      }
+      return "";
+    });
+
+    return svcAnnouncements.join(" ");
+  }
+
   Widget getListViewBasedOnServices(List<Service> services) {
     return Expanded(
       child: ListView.builder(
           itemBuilder: (buildContext, index) {
             Service service = services[index];
-            String time1 = service.bus1.estimatedArrival == null
+
+            String time1 = service.bus1 == null
                 ? ""
                 : DateFormat.Hm().format(
-                    service.bus1.estimatedArrival!.add(Duration(hours: 8)));
-            String time2 = service.bus1.estimatedArrival == null
+                    service.bus1!.estimatedArrival.add(Duration(hours: 8)));
+            String time2 = service.bus2 == null
                 ? ""
                 : DateFormat.Hm().format(
-                    service.bus2.estimatedArrival!.add(Duration(hours: 8)));
-            String time3 = service.bus1.estimatedArrival == null
+                    service.bus2!.estimatedArrival.add(Duration(hours: 8)));
+            String time3 = service.bus3 == null
                 ? ""
                 : DateFormat.Hm().format(
-                    service.bus3.estimatedArrival!.add(Duration(hours: 8)));
+                    service.bus3!.estimatedArrival.add(Duration(hours: 8)));
 
             return Center(
                 child: ListTile(
@@ -80,6 +111,14 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
             // Here we take the value from the MyHomePage object that was created by
             // the App.build method, and use it to set our appbar title.
             title: Text("Bus Arrivals @ Stop"),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/settings");
+                },
+              )
+            ],
           ),
           body: Center(
               // Center is a layout widget. It takes a single child and positions it
@@ -112,6 +151,10 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                   case ArrivalsQueryStateSuccess:
                     var services =
                         (state as ArrivalsQueryStateSuccess).services;
+                    var preparedSpeech = _createSpeechFromServices(services);
+                    context
+                        .read<SpeechReadingBloc>()
+                        .add(SpeechStartLoadingReadingEvent(preparedSpeech));
                     //print(services);
                     resultWidget = getListViewBasedOnServices(services);
                     break;

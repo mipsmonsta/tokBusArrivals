@@ -35,7 +35,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.tokbusarrival"
-        minSdkVersion 16
+        minSdkVersion 21 // TT: adjusted from 16 so as to use the flutter_tts plugins
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

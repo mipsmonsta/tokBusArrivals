@@ -1,12 +1,12 @@
 //http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=
 
 class NextBus {
-  DateTime? estimatedArrival; //2017-04-29T07:20:24+08:00
+  late DateTime estimatedArrival; //2017-04-29T07:20:24+08:00
+
   NextBus(this.estimatedArrival);
 
   NextBus.fromJson(Map<String, dynamic> json) {
-    if (json.isNotEmpty && json.containsKey('EstimatedArrival'))
-      this.estimatedArrival = DateTime.parse(json['EstimatedArrival']);
+    this.estimatedArrival = DateTime.parse(json['EstimatedArrival']);
   }
 
   Map<String, dynamic> toJson() {
@@ -17,29 +17,48 @@ class NextBus {
 }
 
 class Service {
-  final String number;
-  final String busOperator;
-  final NextBus bus1;
-  final NextBus bus2;
-  final NextBus bus3;
+  late String number;
+  late String busOperator;
+  NextBus? bus1;
+  NextBus? bus2;
+  NextBus? bus3;
 
-  const Service(
+  Service(
       {required this.number,
       required this.busOperator,
-      required this.bus1,
-      required this.bus2,
-      required this.bus3});
+      this.bus1,
+      this.bus2,
+      this.bus3});
 
   String toString() {
     return "Service {number: $number, bus operator: $busOperator}";
   }
 
-  Service.fromJson(Map<String, dynamic> json)
-      : number = json["ServiceNo"],
-        busOperator = json["Operator"],
-        bus1 = NextBus.fromJson(json["NextBus"]),
-        bus2 = NextBus.fromJson(json["NextBus2"]),
-        bus3 = NextBus.fromJson(json["NextBus3"]);
+  Service.fromJson(Map<String, dynamic> json) {
+    this.number = json["ServiceNo"];
+    this.busOperator = json["Operator"];
+    try {
+      if (json.containsKey("NextBus") &&
+          json["NextBus"].containsKey("EstimatedArrival"))
+        this.bus1 = NextBus.fromJson(json["NextBus"]);
+    } on FormatException catch (e) {
+      //print(e);
+    }
+    try {
+      if (json.containsKey("NextBus2") &&
+          json["NextBus2"].containsKey("EstimatedArrival"))
+        this.bus2 = NextBus.fromJson(json["NextBus2"]);
+    } on FormatException catch (e) {
+      //print(e);
+    }
+    try {
+      if (json.containsKey("NextBus3") &&
+          json["NextBus3"].containsKey("EstimatedArrival"))
+        this.bus3 = NextBus.fromJson(json["NextBus3"]);
+    } on FormatException catch (e) {
+      //print(e);
+    }
+  }
 
   Map<String, dynamic> toJson() {
     return {

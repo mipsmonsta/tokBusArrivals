@@ -191,7 +191,7 @@ void main() {
                 "Type": "DD"
             },
             "NextBus2": {
-
+                
             },
             "NextBus3": {
                 "OriginCode": "10009",
@@ -231,7 +231,15 @@ void main() {
                 "Type": "DD"
             },
             "NextBus3": {
-                
+                "OriginCode": "28009",
+                "DestinationCode": "28009",
+                "EstimatedArrival": "",
+                "Latitude": "1.3126545",
+                "Longitude": "103.7666475",
+                "VisitNumber": "1",
+                "Load": "SEA",
+                "Feature": "WAB",
+                "Type": "DD"
             }
         }
     ]
@@ -244,9 +252,9 @@ void main() {
         expect(
             actualList,
             isA<List<Service>>()
-                .having((l) => l[0].bus1.estimatedArrival != null, 'bus1', true)
-                .having((l) => l[0].bus2.estimatedArrival == null, 'bus2', true)
-                .having((l) => l[1].bus3.estimatedArrival == null, 'bus3', true)
+                .having((l) => l[0].bus1 != null, 'bus1', true)
+                .having((l) => l[0].bus2 == null, 'bus2', true)
+                .having((l) => l[1].bus3 == null, 'bus3', true)
                 .having((l) => l[0].busOperator, 'busOperator', 'SMRT')
                 .having((l) => l[0].number, 'bus service number', '176'));
       });

@@ -14,11 +14,13 @@ class ArrivalsQueryBloc extends Bloc<ArrivalsQueryEvent, ArrivalsQueryState> {
     switch (event.runtimeType) {
       case ArrivalsQueryStartedEvent:
         String busStopCode = (event as ArrivalsQueryStartedEvent).busStopCode;
+        print(busStopCode);
 
         yield ArrivalsQueryStateLoading();
         List<Service> services;
         try {
           services = await apiClient.getBusArrivals(busStopCode);
+
           if (services.isNotEmpty) {
             yield ArrivalsQueryStateSuccess(services, busStopCode);
           } else {
@@ -27,7 +29,7 @@ class ArrivalsQueryBloc extends Bloc<ArrivalsQueryEvent, ArrivalsQueryState> {
         } catch (exception) {
           if (exception is BusArrivalsNotFoundFailure) {
             yield ArrivalsQueryStateEmpty();
-          } else {
+          } else if (exception is BusArrivalsRequestFailure) {
             yield ArrivalsQueryStateError("Request Failure");
           }
         }
