@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:meta_bus_arrivals_api/meta_bus_arrivals_api.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
+import 'package:tokbusarrival/cubit/SpeechPitchCubit.dart';
+import 'package:tokbusarrival/cubit/SpeechRateCubit.dart';
 import 'package:tokbusarrival/presentation/arrivalsMainPage.dart';
 import 'package:tokbusarrival/presentation/speechSettingsPage.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  HydratedBloc.storage = await HydratedStorage.build(
+      storageDirectory: await getApplicationDocumentsDirectory());
   runApp(MyApp());
 }
 
@@ -36,7 +43,12 @@ class MyApp extends StatelessWidget {
         ),
         routes: {
           '/': (_) => ArrivalsMainPage(),
-          '/settings': (_) => const SpeechSettingsPage(),
+          '/settings': (_) {
+            return MultiBlocProvider(providers: [
+              BlocProvider<SpeechPitchCubit>(create: (_) => SpeechPitchCubit()),
+              BlocProvider<SpeechRateCubit>(create: (_) => SpeechRateCubit())
+            ], child: const SpeechSettingsPage());
+          }
         },
       ),
     );

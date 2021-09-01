@@ -25,19 +25,18 @@ class ArrivalsMainPage extends StatefulWidget {
 }
 
 class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
-  late final TextEditingController _bsController;
-
+  late ArrivalsQueryBloc _arrivalQueryBloc;
+  late SpeechReadingBloc _speechReadingBloc;
   @override
   void initState() {
     super.initState();
     initializeDateFormatting('en_SG', null);
-    _bsController = TextEditingController();
-    _bsController.addListener(_busStopCodeListener);
+    _arrivalQueryBloc = context.read<ArrivalsQueryBloc>();
+    _speechReadingBloc = context.read<SpeechReadingBloc>();
   }
 
-  void _busStopCodeListener() {
-    var bloc = BlocProvider.of<ArrivalsQueryBloc>(context);
-    bloc.add(ArrivalsSeekingBusStopCodeEvent(_bsController.text));
+  void _onCodeSubmitted(String code) {
+    _arrivalQueryBloc.add(ArrivalsSeekingBusStopCodeEvent(code));
   }
 
   String _createSpeechFromServices(List<Service> services) {
@@ -115,6 +114,9 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
               IconButton(
                 icon: const Icon(Icons.settings),
                 onPressed: () {
+                  context
+                      .read<SpeechReadingBloc>()
+                      .add(SpeechStopReadingEvent());
                   Navigator.of(context).pushNamed("/settings");
                 },
               )
@@ -128,7 +130,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
             Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.0),
                 child: TextField(
-                    controller: _bsController,
+                    onSubmitted: _onCodeSubmitted,
                     keyboardType: TextInputType.number,
                     maxLength: 5,
                     decoration: InputDecoration(
@@ -152,8 +154,8 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                     var services =
                         (state as ArrivalsQueryStateSuccess).services;
                     var preparedSpeech = _createSpeechFromServices(services);
-                    context
-                        .read<SpeechReadingBloc>()
+
+                    _speechReadingBloc
                         .add(SpeechStartLoadingReadingEvent(preparedSpeech));
                     //print(services);
                     resultWidget = getListViewBasedOnServices(services);
@@ -173,7 +175,6 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
 
   @override
   void dispose() {
-    _bsController.dispose();
     super.dispose();
   }
 }

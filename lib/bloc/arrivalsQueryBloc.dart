@@ -14,7 +14,7 @@ class ArrivalsQueryBloc extends Bloc<ArrivalsQueryEvent, ArrivalsQueryState> {
     switch (event.runtimeType) {
       case ArrivalsQueryStartedEvent:
         String busStopCode = (event as ArrivalsQueryStartedEvent).busStopCode;
-        print(busStopCode);
+        //print(busStopCode);
 
         yield ArrivalsQueryStateLoading();
         List<Service> services;
