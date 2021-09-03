@@ -16,13 +16,14 @@ class _SpeechSettingsPageState extends State<SpeechSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: Text("Speech settings")),
-        body: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Spacer(),
-              Expanded(
-                  child: Column(children: [
+        body: ListView(children: [
+          LimitedBox(
+            child: Center(child: Text('Adjust Speech Attributes')),
+            maxHeight: 100,
+          ),
+          LimitedBox(
+              maxHeight: 100,
+              child: Column(children: [
                 Text("Speech rate"),
                 BlocConsumer<SpeechRateCubit, double>(builder: (ctx, state) {
                   return Slider(
@@ -36,8 +37,9 @@ class _SpeechSettingsPageState extends State<SpeechSettingsPage> {
                   ctx.read<SpeechReadingBloc>().getTts.setSpeechRate(state);
                 })
               ])),
-              Expanded(
-                  child: Column(children: [
+          LimitedBox(
+              maxHeight: 100,
+              child: Column(children: [
                 Text("Speech Pitch Rate"),
                 BlocConsumer<SpeechPitchCubit, double>(builder: (ctx, state) {
                   return Slider(
@@ -52,8 +54,7 @@ class _SpeechSettingsPageState extends State<SpeechSettingsPage> {
                 }, listener: (ctx, state) {
                   ctx.read<SpeechReadingBloc>().getTts.setPitch(state);
                 }),
-                Spacer()
               ])),
-            ]));
+        ]));
   }
 }
