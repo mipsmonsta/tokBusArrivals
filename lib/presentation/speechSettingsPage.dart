@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
+import 'package:tokbusarrival/cubit/SpeechMuteCubit.dart';
 import 'package:tokbusarrival/cubit/SpeechPitchCubit.dart';
 import 'package:tokbusarrival/cubit/SpeechRateCubit.dart';
 
@@ -55,6 +56,23 @@ class _SpeechSettingsPageState extends State<SpeechSettingsPage> {
                   ctx.read<SpeechReadingBloc>().getTts.setPitch(state);
                 }),
               ])),
+          LimitedBox(
+            maxHeight: 100,
+            child: BlocConsumer<SpeechMuteCubit, bool>(
+              builder: (ctx, state) {
+                return SwitchListTile(
+                    title: Text("Mute Speech"),
+                    value: state,
+                    onChanged: (value) {
+                      ctx.read<SpeechMuteCubit>().toggleMuteOrUnMute(value);
+                    });
+              },
+              listener: (ctx, state) {
+                double volRate = state ? 0.0 : 1.0;
+                ctx.read<SpeechReadingBloc>().getTts.setVolume(volRate);
+              },
+            ),
+          )
         ]));
   }
 }

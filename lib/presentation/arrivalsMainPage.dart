@@ -8,6 +8,8 @@ import 'package:tokbusarrival/bloc/arrivalsQueryState.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
+import 'package:tokbusarrival/cubit/SpeechMuteCubit.dart';
+import 'package:tokbusarrival/widget/minuteTag.dart';
 
 class ArrivalsMainPage extends StatefulWidget {
   ArrivalsMainPage({Key? key}) : super(key: key);
@@ -27,6 +29,7 @@ class ArrivalsMainPage extends StatefulWidget {
 class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
   late ArrivalsQueryBloc _arrivalQueryBloc;
   late SpeechReadingBloc _speechReadingBloc;
+  bool isMaterialBannerVisible = false;
   @override
   void initState() {
     super.initState();
@@ -53,7 +56,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
           announcement = "Service $number has arrived.";
         } else if (relativeMin < 0) {
           int leftMin = -1 * relativeMin;
-          announcement = "Service $number has left about $leftMin ago.";
+          announcement = "Service $number has left about $leftMin minute ago.";
         } else {
           announcement =
               "Service $number will arrived in $relativeMin minutes.";
@@ -86,14 +89,39 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                 : DateFormat.Hm().format(
                     service.bus3!.estimatedArrival.add(Duration(hours: 8)));
 
+            int arrivalMin = service.bus1!.estimatedArrival
+                .difference(DateTime.now())
+                .inMinutes;
+
             return Center(
                 child: ListTile(
-                    leading: Icon(Icons.bus_alert),
-                    title: Text(service.number),
-                    subtitle: Text("Next Buses in: $time1 $time2 $time3")));
+              leading: Icon(Icons.bus_alert),
+              title: Text(service.number),
+              subtitle: Text("Next Buses in: $time1 $time2 $time3"),
+              trailing: MinuteTag(
+                arrivalMin: arrivalMin,
+              ),
+            ));
           },
           itemCount: services.length),
     );
+  }
+
+  MaterialBanner getIsMuteMaterialBanner(BuildContext context) {
+    return MaterialBanner(
+        actions: [
+          TextButton(
+            child: const Text("UNMUTE"),
+            onPressed: () {
+              context.read<SpeechMuteCubit>().toggleMuteOrUnMute(false);
+              context.read<SpeechReadingBloc>().getTts.setVolume(1.0);
+              ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+            },
+          )
+        ],
+        backgroundColor: Colors.amber,
+        content: const Text("Speech Announcement is muted"),
+        leading: const Icon(Icons.info));
   }
 
   @override
@@ -125,51 +153,77 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
           body: Center(
               // Center is a layout widget. It takes a single child and positions it
               // in the middle of the parent.
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-            Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: TextField(
-                    onSubmitted: _onCodeSubmitted,
-                    keyboardType: TextInputType.number,
-                    maxLength: 5,
-                    decoration: InputDecoration(
-                        hintText: "5 digit bus stop code e.g. 65209",
-                        icon: Icon(Icons.hail)))),
-            BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
-              builder: (context, state) {
-                Widget resultWidget;
-                switch (state.runtimeType) {
-                  case ArrivalsQueryStateLoading:
-                    resultWidget = Center(child: CircularProgressIndicator());
-                    break;
+              child: BlocListener<SpeechMuteCubit, bool>(
+                  listener: (ctx, state) {
+                    if (state) {
+                      ScaffoldMessenger.of(ctx)
+                          .showMaterialBanner(getIsMuteMaterialBanner(ctx));
+                      setState(() {
+                        isMaterialBannerVisible = true;
+                      });
+                    } else {
+                      setState(() {
+                        isMaterialBannerVisible = false;
+                      });
+                    }
+                  },
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Padding(
+                            padding: isMaterialBannerVisible
+                                ? const EdgeInsets.fromLTRB(8.0, 52.0, 8.0, 0)
+                                : const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                            child: TextField(
+                                onSubmitted: _onCodeSubmitted,
+                                keyboardType: TextInputType.number,
+                                maxLength: 5,
+                                decoration: InputDecoration(
+                                    hintText:
+                                        "5 digit bus stop code e.g. 65209",
+                                    icon: Icon(Icons.hail)))),
+                        BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
+                          builder: (context, state) {
+                            Widget resultWidget;
+                            switch (state.runtimeType) {
+                              case ArrivalsQueryStateLoading:
+                                resultWidget =
+                                    Center(child: CircularProgressIndicator());
+                                break;
 
-                  case ArrivalsQueryStateError:
-                    var errorText = (state as ArrivalsQueryStateError).error;
-                    resultWidget = Center(
-                        child: Text("Error Getting Arrivals: $errorText,"));
-                    break;
+                              case ArrivalsQueryStateError:
+                                var errorText =
+                                    (state as ArrivalsQueryStateError).error;
+                                resultWidget = Center(
+                                    child: Text(
+                                        "Error Getting Arrivals: $errorText,"));
+                                break;
 
-                  case ArrivalsQueryStateSuccess:
-                    var services =
-                        (state as ArrivalsQueryStateSuccess).services;
-                    var preparedSpeech = _createSpeechFromServices(services);
+                              case ArrivalsQueryStateSuccess:
+                                var services =
+                                    (state as ArrivalsQueryStateSuccess)
+                                        .services;
+                                var preparedSpeech =
+                                    _createSpeechFromServices(services);
 
-                    _speechReadingBloc
-                        .add(SpeechStartLoadingReadingEvent(preparedSpeech));
-                    //print(services);
-                    resultWidget = getListViewBasedOnServices(services);
-                    break;
-                  case ArrivalsQueryStateEmpty:
-                  default:
-                    resultWidget = Center(child: Text("No results"));
-                    break;
-                }
+                                _speechReadingBloc.add(
+                                    SpeechStartLoadingReadingEvent(
+                                        preparedSpeech));
+                                //print(services);
+                                resultWidget =
+                                    getListViewBasedOnServices(services);
+                                break;
+                              case ArrivalsQueryStateEmpty:
+                              default:
+                                resultWidget =
+                                    Center(child: Text("No results"));
+                                break;
+                            }
 
-                return resultWidget;
-              },
-            )
-          ]))),
+                            return resultWidget;
+                          },
+                        )
+                      ])))),
     );
   }
 

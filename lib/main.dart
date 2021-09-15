@@ -5,6 +5,7 @@ import 'package:meta_bus_arrivals_api/meta_bus_arrivals_api.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
+import 'package:tokbusarrival/cubit/SpeechMuteCubit.dart';
 import 'package:tokbusarrival/cubit/SpeechPitchCubit.dart';
 import 'package:tokbusarrival/cubit/SpeechRateCubit.dart';
 import 'package:tokbusarrival/presentation/arrivalsMainPage.dart';
@@ -26,6 +27,9 @@ class MyApp extends StatelessWidget {
         BlocProvider<ArrivalsQueryBloc>(
             create: (context) => ArrivalsQueryBloc(MetaBusArrivalsApiClient())),
         BlocProvider<SpeechReadingBloc>(create: (_) => SpeechReadingBloc()),
+        BlocProvider<SpeechMuteCubit>(
+            create: (_) =>
+                SpeechMuteCubit()), // put above MaterialAppLevel so that mute state read/write app-wide
       ],
       child: MaterialApp(
         title: 'Tok Bus Arrival',
@@ -46,7 +50,7 @@ class MyApp extends StatelessWidget {
           '/settings': (_) {
             return MultiBlocProvider(providers: [
               BlocProvider<SpeechPitchCubit>(create: (_) => SpeechPitchCubit()),
-              BlocProvider<SpeechRateCubit>(create: (_) => SpeechRateCubit())
+              BlocProvider<SpeechRateCubit>(create: (_) => SpeechRateCubit()),
             ], child: const SpeechSettingsPage());
           }
         },
