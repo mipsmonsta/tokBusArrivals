@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 class MinuteTag extends StatelessWidget {
   final int arrivalMin;
   final String capacity; //SEA, SDA, LSD
-  const MinuteTag({Key? key, required this.arrivalMin, required this.capacity})
-      : super(key: key);
+  const MinuteTag({Key? key, required this.arrivalMin, required this.capacity}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,22 +32,19 @@ class MinuteTag extends StatelessWidget {
           children: [
             Expanded(
               child: CircleAvatar(
-                backgroundColor:
-                    capacity == "SEA" ? Colors.green[200] : Colors.transparent,
+                backgroundColor: capacity == "SEA" ? Colors.green[200] : Colors.transparent,
                 maxRadius: 3.0,
               ),
             ),
             Expanded(
               child: CircleAvatar(
-                backgroundColor:
-                    capacity == "SDA" ? Colors.amber : Colors.transparent,
+                backgroundColor: capacity == "SDA" ? Colors.amber : Colors.transparent,
                 maxRadius: 3.0,
               ),
             ),
             Expanded(
               child: CircleAvatar(
-                backgroundColor:
-                    capacity == "LSD" ? Colors.red : Colors.transparent,
+                backgroundColor: capacity == "LSD" ? Colors.red : Colors.transparent,
                 maxRadius: 3.0,
               ),
             ),

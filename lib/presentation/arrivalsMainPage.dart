@@ -80,42 +80,58 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
   Widget getListViewBasedOnServices(List<Service> services) {
     return Expanded(
         child: RefreshIndicator(
-      onRefresh: _onRefreshActivated,
-      child: ListView.builder(
-          itemBuilder: (buildContext, index) {
-            Service service = services[index];
+            onRefresh: _onRefreshActivated,
+            child: ListView.builder(
+                itemBuilder: (buildContext, index) {
+                  if (index == 0) {
+                    //item 0 is the referesh info
+                    return Center(
+                        child: RichText(
+                            text: TextSpan(
+                                style: DefaultTextStyle.of(buildContext).style,
+                                children: [
+                          TextSpan(
+                              text: "Updated: ",
+                              style: TextStyle(color: Colors.black87)),
+                          TextSpan(
+                              text: DateFormat.Hm().format(DateTime.now()),
+                              style: TextStyle(fontWeight: FontWeight.bold))
+                        ])));
+                  } else {
+                    Service service = services[index - 1];
 
-            String time1 = service.bus1 == null
-                ? ""
-                : DateFormat.Hm().format(
-                    service.bus1!.estimatedArrival.add(Duration(hours: 8)));
-            String time2 = service.bus2 == null
-                ? ""
-                : DateFormat.Hm().format(
-                    service.bus2!.estimatedArrival.add(Duration(hours: 8)));
-            String time3 = service.bus3 == null
-                ? ""
-                : DateFormat.Hm().format(
-                    service.bus3!.estimatedArrival.add(Duration(hours: 8)));
+                    String time1 = service.bus1 == null
+                        ? ""
+                        : DateFormat.Hm().format(service.bus1!.estimatedArrival
+                            .add(Duration(hours: 8)));
+                    String time2 = service.bus2 == null
+                        ? ""
+                        : DateFormat.Hm().format(service.bus2!.estimatedArrival
+                            .add(Duration(hours: 8)));
+                    String time3 = service.bus3 == null
+                        ? ""
+                        : DateFormat.Hm().format(service.bus3!.estimatedArrival
+                            .add(Duration(hours: 8)));
 
-            int arrivalMin = service.bus1!.estimatedArrival
-                .difference(DateTime.now())
-                .inMinutes;
+                    int arrivalMin = service.bus1!.estimatedArrival
+                        .difference(DateTime.now())
+                        .inMinutes;
 
-            return Center(
-                child: ListTile(
-              leading: OperatorColorIcon(Icons.bus_alert,
-                  operatorName: service.busOperator),
-              title: Text(service.number),
-              subtitle: Text("Next Buses in: $time1 $time2 $time3"),
-              trailing: MinuteTag(
-                arrivalMin: arrivalMin,
-                capacity: service.bus1!.capacity,
-              ),
+                    return Center(
+                        child: ListTile(
+                      leading: OperatorColorIcon(Icons.bus_alert,
+                          operatorName: service.busOperator),
+                      title: Text(service.number),
+                      subtitle: Text("Next Buses in: $time1 $time2 $time3"),
+                      trailing: MinuteTag(
+                        arrivalMin: arrivalMin,
+                        capacity: service.bus1!.capacity,
+                      ),
+                    ));
+                  }
+                },
+                itemCount: services.length + 1) // +1 for update time item,
             ));
-          },
-          itemCount: services.length),
-    ));
   }
 
   MaterialBanner getIsMuteMaterialBanner(BuildContext context) {
