@@ -10,6 +10,7 @@ import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
 import 'package:tokbusarrival/cubit/SpeechMuteCubit.dart';
 import 'package:tokbusarrival/widget/minuteTag.dart';
+import 'package:tokbusarrival/widget/operatorColorIcon.dart';
 
 class ArrivalsMainPage extends StatefulWidget {
   ArrivalsMainPage({Key? key}) : super(key: key);
@@ -29,7 +30,8 @@ class ArrivalsMainPage extends StatefulWidget {
 class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
   late ArrivalsQueryBloc _arrivalQueryBloc;
   late SpeechReadingBloc _speechReadingBloc;
-  bool isMaterialBannerVisible = false;
+  bool _isMaterialBannerVisible = false;
+  String _inputtedCode = "";
   @override
   void initState() {
     super.initState();
@@ -39,6 +41,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
   }
 
   void _onCodeSubmitted(String code) {
+    _inputtedCode = code;
     _arrivalQueryBloc.add(ArrivalsSeekingBusStopCodeEvent(code));
   }
 
@@ -70,8 +73,14 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
     return svcAnnouncements.join(" ");
   }
 
+  Future<void> _onRefreshActivated() async {
+    _onCodeSubmitted(_inputtedCode);
+  }
+
   Widget getListViewBasedOnServices(List<Service> services) {
     return Expanded(
+        child: RefreshIndicator(
+      onRefresh: _onRefreshActivated,
       child: ListView.builder(
           itemBuilder: (buildContext, index) {
             Service service = services[index];
@@ -95,7 +104,8 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
 
             return Center(
                 child: ListTile(
-              leading: Icon(Icons.bus_alert),
+              leading: OperatorColorIcon(Icons.bus_alert,
+                  operatorName: service.busOperator),
               title: Text(service.number),
               subtitle: Text("Next Buses in: $time1 $time2 $time3"),
               trailing: MinuteTag(
@@ -104,7 +114,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
             ));
           },
           itemCount: services.length),
-    );
+    ));
   }
 
   MaterialBanner getIsMuteMaterialBanner(BuildContext context) {
@@ -159,11 +169,11 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                       ScaffoldMessenger.of(ctx)
                           .showMaterialBanner(getIsMuteMaterialBanner(ctx));
                       setState(() {
-                        isMaterialBannerVisible = true;
+                        _isMaterialBannerVisible = true;
                       });
                     } else {
                       setState(() {
-                        isMaterialBannerVisible = false;
+                        _isMaterialBannerVisible = false;
                       });
                     }
                   },
@@ -171,7 +181,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Padding(
-                            padding: isMaterialBannerVisible
+                            padding: _isMaterialBannerVisible
                                 ? const EdgeInsets.fromLTRB(8.0, 52.0, 8.0, 0)
                                 : const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
                             child: TextField(
