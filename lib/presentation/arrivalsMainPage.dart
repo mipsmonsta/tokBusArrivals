@@ -110,6 +110,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
               subtitle: Text("Next Buses in: $time1 $time2 $time3"),
               trailing: MinuteTag(
                 arrivalMin: arrivalMin,
+                capacity: service.bus1!.capacity,
               ),
             ));
           },

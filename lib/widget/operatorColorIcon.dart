@@ -24,7 +24,7 @@ class OperatorColorIcon extends StatelessWidget {
         svcBkgColor = Colors.green[900];
         break;
       case "SBST":
-        svcColor = Colors.red[700];
+        svcColor = Colors.white;
         svcBkgColor = Colors.purple[700];
         break;
     }
