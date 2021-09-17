@@ -9,6 +9,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
 import 'package:tokbusarrival/cubit/SpeechMuteCubit.dart';
+import 'package:tokbusarrival/cubit/SpeechPitchCubit.dart';
+import 'package:tokbusarrival/cubit/SpeechRateCubit.dart';
 import 'package:tokbusarrival/widget/minuteTag.dart';
 import 'package:tokbusarrival/widget/operatorColorIcon.dart';
 
@@ -28,21 +30,18 @@ class ArrivalsMainPage extends StatefulWidget {
 }
 
 class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
-  late ArrivalsQueryBloc _arrivalQueryBloc;
-  late SpeechReadingBloc _speechReadingBloc;
-  bool _isMaterialBannerVisible = false;
   String _inputtedCode = "";
   @override
   void initState() {
     super.initState();
     initializeDateFormatting('en_SG', null);
-    _arrivalQueryBloc = context.read<ArrivalsQueryBloc>();
-    _speechReadingBloc = context.read<SpeechReadingBloc>();
   }
 
   void _onCodeSubmitted(String code) {
     _inputtedCode = code;
-    _arrivalQueryBloc.add(ArrivalsSeekingBusStopCodeEvent(code));
+    context
+        .read<ArrivalsQueryBloc>()
+        .add(ArrivalsSeekingBusStopCodeEvent(code));
   }
 
   String _createSpeechFromServices(List<Service> services) {
@@ -134,21 +133,10 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
             ));
   }
 
-  MaterialBanner getIsMuteMaterialBanner(BuildContext context) {
-    return MaterialBanner(
-        actions: [
-          TextButton(
-            child: const Text("UNMUTE"),
-            onPressed: () {
-              context.read<SpeechMuteCubit>().toggleMuteOrUnMute(false);
-              context.read<SpeechReadingBloc>().getTts.setVolume(1.0);
-              ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-            },
-          )
-        ],
-        backgroundColor: Colors.amber,
-        content: const Text("Speech Announcement is muted"),
-        leading: const Icon(Icons.info));
+  Future<bool> _onPop() {
+    context.read<SpeechMuteCubit>().toggleMuteOrUnMute(false);
+
+    return Future.value(true);
   }
 
   @override
@@ -159,98 +147,93 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return SafeArea(
       child: Scaffold(
-          appBar: AppBar(
-            // Here we take the value from the MyHomePage object that was created by
-            // the App.build method, and use it to set our appbar title.
-            title: Text("Bus Arrivals @ Stop"),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  context
-                      .read<SpeechReadingBloc>()
-                      .add(SpeechStopReadingEvent());
-                  Navigator.of(context).pushNamed("/settings");
-                },
-              )
-            ],
-          ),
-          body: Center(
-              // Center is a layout widget. It takes a single child and positions it
-              // in the middle of the parent.
-              child: BlocListener<SpeechMuteCubit, bool>(
-                  listener: (ctx, state) {
-                    if (state) {
-                      ScaffoldMessenger.of(ctx)
-                          .showMaterialBanner(getIsMuteMaterialBanner(ctx));
-                      setState(() {
-                        _isMaterialBannerVisible = true;
-                      });
-                    } else {
-                      setState(() {
-                        _isMaterialBannerVisible = false;
-                      });
-                    }
-                  },
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Padding(
-                            padding: _isMaterialBannerVisible
-                                ? const EdgeInsets.fromLTRB(8.0, 52.0, 8.0, 0)
-                                : const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-                            child: TextField(
-                                onSubmitted: _onCodeSubmitted,
-                                keyboardType: TextInputType.number,
-                                maxLength: 5,
-                                decoration: InputDecoration(
-                                    hintText:
-                                        "5 digit bus stop code e.g. 65209",
-                                    icon: Icon(Icons.hail)))),
-                        BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
-                          builder: (context, state) {
-                            Widget resultWidget;
-                            switch (state.runtimeType) {
-                              case ArrivalsQueryStateLoading:
-                                resultWidget =
-                                    Center(child: CircularProgressIndicator());
-                                break;
+        appBar: AppBar(
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Builder(builder: (context) {
+            bool isSpeechMuted = context.watch<SpeechMuteCubit>().state;
+            var speechRate = context.watch<SpeechRateCubit>().state;
+            var speechPitch = context.watch<SpeechPitchCubit>().state;
 
-                              case ArrivalsQueryStateError:
-                                var errorText =
-                                    (state as ArrivalsQueryStateError).error;
-                                resultWidget = Center(
-                                    child: Text(
-                                        "Error Getting Arrivals: $errorText,"));
-                                break;
+            context.read<SpeechReadingBloc>().getTts
+              ..setPitch(speechPitch)
+              ..setSpeechRate(speechRate)
+              ..setVolume(isSpeechMuted ? 0.0 : 1.0);
 
-                              case ArrivalsQueryStateSuccess:
-                                var services =
-                                    (state as ArrivalsQueryStateSuccess)
-                                        .services;
-                                var preparedSpeech =
-                                    _createSpeechFromServices(services);
+            return Text("Bus Arrivals @ Stop");
+          }),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                context.read<SpeechReadingBloc>().add(SpeechStopReadingEvent());
+                Navigator.of(context).pushNamed("/settings");
+              },
+            )
+          ],
+        ),
+        body: WillPopScope(
+          onWillPop: _onPop, //unmute when back is pressed
+          child: Center(
+              child:
+                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+            Builder(builder: (context) {
+              bool isSpeechMute = context
+                  .watch<SpeechMuteCubit>()
+                  .state; //Adjust space for materialbanner if speech is muted
 
-                                _speechReadingBloc.add(
-                                    SpeechStartLoadingReadingEvent(
-                                        preparedSpeech));
-                                //print(services);
-                                resultWidget =
-                                    getListViewBasedOnServices(services);
-                                break;
-                              case ArrivalsQueryStateEmpty:
-                              default:
-                                resultWidget =
-                                    Center(child: Text("No results"));
-                                break;
-                            }
+              return Padding(
+                  padding: isSpeechMute
+                      ? const EdgeInsets.fromLTRB(8.0, 52.0, 8.0, 0)
+                      : const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                  child: TextField(
+                      onSubmitted: _onCodeSubmitted,
+                      keyboardType: TextInputType.number,
+                      maxLength: 5,
+                      decoration: InputDecoration(
+                          hintText: "5 digit bus stop code e.g. 65209",
+                          icon: Icon(Icons.hail))));
+            }),
+            BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
+              builder: (context, state) {
+                Widget resultWidget;
+                switch (state.runtimeType) {
+                  case ArrivalsQueryStateLoading:
+                    resultWidget = Center(child: CircularProgressIndicator());
+                    break;
 
-                            return resultWidget;
-                          },
-                        )
-                      ])))),
+                  case ArrivalsQueryStateError:
+                    var errorText = (state as ArrivalsQueryStateError).error;
+                    resultWidget =
+                        Center(child: Text("Error Getting Arrivals: ,"));
+                    break;
+
+                  case ArrivalsQueryStateSuccess:
+                    var services =
+                        (state as ArrivalsQueryStateSuccess).services;
+                    var preparedSpeech = _createSpeechFromServices(services);
+
+                    context
+                        .read<SpeechReadingBloc>()
+                        .add(SpeechStartLoadingReadingEvent(preparedSpeech));
+                    //print(services);
+                    resultWidget = getListViewBasedOnServices(services);
+                    break;
+                  case ArrivalsQueryStateEmpty:
+                  default:
+                    resultWidget = Center(child: Text("No results"));
+                    break;
+                }
+
+                return resultWidget;
+              },
+            )
+          ])),
+        ),
+      ),
     );
   }
 

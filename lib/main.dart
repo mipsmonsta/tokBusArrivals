@@ -20,16 +20,35 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
+  MaterialBanner getIsMuteMaterialBanner(BuildContext context) {
+    return MaterialBanner(
+        actions: [
+          TextButton(
+            child: const Text("UNMUTE"),
+            onPressed: () {
+              context.read<SpeechMuteCubit>().toggleMuteOrUnMute(false);
+            },
+          )
+        ],
+        backgroundColor: Colors.amber,
+        content: const Text("Speech Announcement is muted"),
+        leading: const Icon(Icons.info));
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ArrivalsQueryBloc>(
             create: (context) => ArrivalsQueryBloc(MetaBusArrivalsApiClient())),
-        BlocProvider<SpeechReadingBloc>(create: (_) => SpeechReadingBloc()),
-        BlocProvider<SpeechMuteCubit>(
+
+        BlocProvider<SpeechPitchCubit>(create: (_) => SpeechPitchCubit()),
+        BlocProvider<SpeechRateCubit>(create: (_) => SpeechRateCubit()),
+        BlocProvider<SpeechMuteCubit>(create: (_) => SpeechMuteCubit()),
+        BlocProvider<SpeechReadingBloc>(
             create: (_) =>
-                SpeechMuteCubit()), // put above MaterialAppLevel so that mute state read/write app-wide
+                SpeechReadingBloc()), // put above MaterialAppLevel so that mute state read/write app-wide
       ],
       child: MaterialApp(
         title: 'Tok Bus Arrival',
@@ -46,13 +65,18 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         routes: {
-          '/': (_) => ArrivalsMainPage(),
-          '/settings': (_) {
-            return MultiBlocProvider(providers: [
-              BlocProvider<SpeechPitchCubit>(create: (_) => SpeechPitchCubit()),
-              BlocProvider<SpeechRateCubit>(create: (_) => SpeechRateCubit()),
-            ], child: const SpeechSettingsPage());
-          }
+          '/': (_) => BlocListener<SpeechMuteCubit, bool>(
+              listener: (context, state) {
+                if (state) {
+                  ScaffoldMessenger.of(context)
+                    ..removeCurrentMaterialBanner()
+                    ..showMaterialBanner(getIsMuteMaterialBanner(context));
+                } else {
+                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                }
+              },
+              child: ArrivalsMainPage()),
+          '/settings': (_) => SpeechSettingsPage(),
         },
       ),
     );
