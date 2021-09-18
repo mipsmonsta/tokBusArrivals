@@ -28,8 +28,10 @@ class _SpeechSettingsPageState extends State<SpeechSettingsPage> {
                 Text("Speech rate"),
                 BlocConsumer<SpeechRateCubit, double>(builder: (ctx, state) {
                   return Slider(
+                      min: 0.25,
+                      max: 1.0,
                       value: state,
-                      divisions: 4,
+                      divisions: 3,
                       label: state.toString(),
                       onChanged: (value) {
                         ctx.read<SpeechRateCubit>().adjustToValue(value);

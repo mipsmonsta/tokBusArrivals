@@ -2,7 +2,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class SpeechRateCubit extends HydratedCubit<double> {
   final double max = 1.0;
-  final double min = 0.0;
+  final double min = 0.25;
 
   SpeechRateCubit() : super(0.5);
 

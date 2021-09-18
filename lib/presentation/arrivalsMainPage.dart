@@ -133,12 +133,6 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
             ));
   }
 
-  Future<bool> _onPop() {
-    context.read<SpeechMuteCubit>().toggleMuteOrUnMute(false);
-
-    return Future.value(true);
-  }
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -153,18 +147,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
-          title: Builder(builder: (context) {
-            bool isSpeechMuted = context.watch<SpeechMuteCubit>().state;
-            var speechRate = context.watch<SpeechRateCubit>().state;
-            var speechPitch = context.watch<SpeechPitchCubit>().state;
-
-            context.read<SpeechReadingBloc>().getTts
-              ..setPitch(speechPitch)
-              ..setSpeechRate(speechRate)
-              ..setVolume(isSpeechMuted ? 0.0 : 1.0);
-
-            return Text("Bus Arrivals @ Stop");
-          }),
+          title: Text("Bus Arrivals @ Stop"),
           actions: [
             IconButton(
               icon: const Icon(Icons.settings),
@@ -175,64 +158,60 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
             )
           ],
         ),
-        body: WillPopScope(
-          onWillPop: _onPop, //unmute when back is pressed
-          child: Center(
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-            Builder(builder: (context) {
-              bool isSpeechMute = context
-                  .watch<SpeechMuteCubit>()
-                  .state; //Adjust space for materialbanner if speech is muted
+        body: Center(
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+          Builder(builder: (context) {
+            bool isSpeechMute = context
+                .watch<SpeechMuteCubit>()
+                .state; //Adjust space for materialbanner if speech is muted
 
-              return Padding(
-                  padding: isSpeechMute
-                      ? const EdgeInsets.fromLTRB(8.0, 52.0, 8.0, 0)
-                      : const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-                  child: TextField(
-                      onSubmitted: _onCodeSubmitted,
-                      keyboardType: TextInputType.number,
-                      maxLength: 5,
-                      decoration: InputDecoration(
-                          hintText: "5 digit bus stop code e.g. 65209",
-                          icon: Icon(Icons.hail))));
-            }),
-            BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
-              builder: (context, state) {
-                Widget resultWidget;
-                switch (state.runtimeType) {
-                  case ArrivalsQueryStateLoading:
-                    resultWidget = Center(child: CircularProgressIndicator());
-                    break;
+            return Padding(
+                padding: //isSpeechMute
+                    //? const EdgeInsets.fromLTRB(8.0, 52.0, 8.0, 0) :
+                    const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                child: TextField(
+                    onSubmitted: _onCodeSubmitted,
+                    keyboardType: TextInputType.number,
+                    maxLength: 5,
+                    decoration: InputDecoration(
+                        hintText: "5 digit bus stop code e.g. 65209",
+                        icon: Icon(Icons.hail))));
+          }),
+          BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
+            builder: (context, state) {
+              Widget resultWidget;
+              switch (state.runtimeType) {
+                case ArrivalsQueryStateLoading:
+                  resultWidget = Center(child: CircularProgressIndicator());
+                  break;
 
-                  case ArrivalsQueryStateError:
-                    var errorText = (state as ArrivalsQueryStateError).error;
-                    resultWidget =
-                        Center(child: Text("Error Getting Arrivals: ,"));
-                    break;
+                case ArrivalsQueryStateError:
+                  var errorText = (state as ArrivalsQueryStateError).error;
+                  resultWidget =
+                      Center(child: Text("Error Getting Arrivals: ,"));
+                  break;
 
-                  case ArrivalsQueryStateSuccess:
-                    var services =
-                        (state as ArrivalsQueryStateSuccess).services;
-                    var preparedSpeech = _createSpeechFromServices(services);
+                case ArrivalsQueryStateSuccess:
+                  var services = (state as ArrivalsQueryStateSuccess).services;
+                  var preparedSpeech = _createSpeechFromServices(services);
 
-                    context
-                        .read<SpeechReadingBloc>()
-                        .add(SpeechStartLoadingReadingEvent(preparedSpeech));
-                    //print(services);
-                    resultWidget = getListViewBasedOnServices(services);
-                    break;
-                  case ArrivalsQueryStateEmpty:
-                  default:
-                    resultWidget = Center(child: Text("No results"));
-                    break;
-                }
+                  context
+                      .read<SpeechReadingBloc>()
+                      .add(SpeechStartLoadingReadingEvent(preparedSpeech));
+                  //print(services);
+                  resultWidget = getListViewBasedOnServices(services);
+                  break;
+                case ArrivalsQueryStateEmpty:
+                default:
+                  resultWidget = Center(child: Text("No results"));
+                  break;
+              }
 
-                return resultWidget;
-              },
-            )
-          ])),
-        ),
+              return resultWidget;
+            },
+          )
+        ])),
       ),
     );
   }

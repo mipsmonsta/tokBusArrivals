@@ -5,20 +5,22 @@ import 'package:tokbusarrival/bloc/speechReadingState.dart';
 
 class SpeechReadingBloc extends Bloc<SpeechReadingEvent, SpeechReadingState> {
   final FlutterTts _flutterTts = FlutterTts();
-  SpeechReadingBloc() : super(SpeechPreparingState()) {
-    setUpTts();
+  SpeechReadingBloc(bool isMute, double pitch, double rate)
+      : super(SpeechPreparingState()) {
+    setUpTts(isMute, pitch, rate);
   }
 
   FlutterTts get getTts {
     return _flutterTts;
   }
 
-  void setUpTts() async {
+  void setUpTts(bool isMute, double pitch, double rate) async {
     await _flutterTts.awaitSpeakCompletion(true);
     await _flutterTts.setLanguage("en-US");
-    await _flutterTts.setSpeechRate(0.5);
-    await _flutterTts.setVolume(1.0);
-    await _flutterTts.setPitch(1.0);
+    await _flutterTts.setSpeechRate(rate);
+    await _flutterTts.setVolume(isMute ? 0.0 : 1.0);
+    await _flutterTts.setPitch(pitch);
+    print("$isMute, $pitch, $rate");
     _flutterTts.setCompletionHandler(() {
       add(SpeechStopReadingEvent());
     });

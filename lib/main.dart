@@ -47,8 +47,14 @@ class MyApp extends StatelessWidget {
         BlocProvider<SpeechRateCubit>(create: (_) => SpeechRateCubit()),
         BlocProvider<SpeechMuteCubit>(create: (_) => SpeechMuteCubit()),
         BlocProvider<SpeechReadingBloc>(
-            create: (_) =>
-                SpeechReadingBloc()), // put above MaterialAppLevel so that mute state read/write app-wide
+            lazy:
+                false, //disable lazy creation so that the tts can be set with vol, pitch and rate to be ready for speech early
+            create: (context) => SpeechReadingBloc(
+                context.read<SpeechMuteCubit>().state,
+                context.read<SpeechPitchCubit>().state,
+                context
+                    .read<SpeechRateCubit>()
+                    .state)), // put above MaterialAppLevel so that mute state read/write app-wide
       ],
       child: MaterialApp(
         title: 'Tok Bus Arrival',
@@ -65,17 +71,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         routes: {
-          '/': (_) => BlocListener<SpeechMuteCubit, bool>(
-              listener: (context, state) {
-                if (state) {
-                  ScaffoldMessenger.of(context)
-                    ..removeCurrentMaterialBanner()
-                    ..showMaterialBanner(getIsMuteMaterialBanner(context));
-                } else {
-                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-                }
-              },
-              child: ArrivalsMainPage()),
+          '/': (_) => ArrivalsMainPage(),
           '/settings': (_) => SpeechSettingsPage(),
         },
       ),
