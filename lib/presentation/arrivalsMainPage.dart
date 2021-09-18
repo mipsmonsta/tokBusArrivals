@@ -8,9 +8,6 @@ import 'package:tokbusarrival/bloc/arrivalsQueryState.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
-import 'package:tokbusarrival/cubit/SpeechMuteCubit.dart';
-import 'package:tokbusarrival/cubit/SpeechPitchCubit.dart';
-import 'package:tokbusarrival/cubit/SpeechRateCubit.dart';
 import 'package:tokbusarrival/widget/minuteTag.dart';
 import 'package:tokbusarrival/widget/operatorColorIcon.dart';
 
@@ -150,21 +147,27 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
           title: Text("Bus Arrivals @ Stop"),
           actions: [
             IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {
-                context.read<SpeechReadingBloc>().add(SpeechStopReadingEvent());
-                Navigator.of(context).pushNamed("/settings");
-              },
-            )
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  context
+                      .read<SpeechReadingBloc>()
+                      .add(SpeechStopReadingEvent());
+                  Navigator.of(context).pushNamed("/settings");
+                }),
+            IconButton(
+                icon: const Icon(Icons.camera),
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/camera");
+                }),
           ],
         ),
         body: Center(
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.start, children: [
           Builder(builder: (context) {
-            bool isSpeechMute = context
-                .watch<SpeechMuteCubit>()
-                .state; //Adjust space for materialbanner if speech is muted
+            // bool isSpeechMute = context
+            //     .watch<SpeechMuteCubit>()
+            //     .state; //Adjust space for materialbanner if speech is muted
 
             return Padding(
                 padding: //isSpeechMute
@@ -189,7 +192,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                 case ArrivalsQueryStateError:
                   var errorText = (state as ArrivalsQueryStateError).error;
                   resultWidget =
-                      Center(child: Text("Error Getting Arrivals: ,"));
+                      Center(child: Text("Error Getting Arrivals: $errorText"));
                   break;
 
                 case ArrivalsQueryStateSuccess:

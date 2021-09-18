@@ -20,7 +20,7 @@ class SpeechReadingBloc extends Bloc<SpeechReadingEvent, SpeechReadingState> {
     await _flutterTts.setSpeechRate(rate);
     await _flutterTts.setVolume(isMute ? 0.0 : 1.0);
     await _flutterTts.setPitch(pitch);
-    print("$isMute, $pitch, $rate");
+    //print("$isMute, $pitch, $rate");
     _flutterTts.setCompletionHandler(() {
       add(SpeechStopReadingEvent());
     });

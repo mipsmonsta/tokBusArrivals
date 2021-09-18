@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -11,8 +12,14 @@ import 'package:tokbusarrival/cubit/SpeechRateCubit.dart';
 import 'package:tokbusarrival/presentation/arrivalsMainPage.dart';
 import 'package:tokbusarrival/presentation/speechSettingsPage.dart';
 
+import 'presentation/cameraPage.dart';
+
+late List<CameraDescription> cameras;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  cameras = await availableCameras();
+
   HydratedBloc.storage = await HydratedStorage.build(
       storageDirectory: await getApplicationDocumentsDirectory());
   runApp(MyApp());
@@ -73,6 +80,7 @@ class MyApp extends StatelessWidget {
         routes: {
           '/': (_) => ArrivalsMainPage(),
           '/settings': (_) => SpeechSettingsPage(),
+          '/camera': (_) => CameraPage(cameras: cameras),
         },
       ),
     );
