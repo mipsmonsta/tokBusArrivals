@@ -1,7 +1,9 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 
 class CameraPage extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -15,19 +17,103 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   late CameraController _controller;
   bool _controllerInitialized = false;
   String _textToShow = "";
+  CameraImage? _savedImage;
+  double _previousScale = 1.0;
+  double _scale = 1.0;
 
   @override
   void initState() {
     super.initState();
-    print(widget.cameras);
+
     WidgetsBinding.instance?.addObserver(this);
-    _controller = CameraController(widget.cameras[0], ResolutionPreset.medium);
-    _controller?.initialize().then((_) {
+    _controller = CameraController(widget.cameras[0], ResolutionPreset.high);
+    _controller.initialize().then((_) {
       if (!mounted) {
         return;
       }
+
+      _startStreaming();
+
       setState(() => _controllerInitialized = true);
     });
+  }
+
+  void _startStreaming() async {
+    await _controller
+        .startImageStream((CameraImage image) => _processedCameraImage(image));
+  }
+
+  void _processedCameraImage(CameraImage image) {
+    setState(() => _savedImage = image);
+  }
+
+  void _tryToGetText() async {
+    if (_savedImage == null) return;
+
+    final WriteBuffer allBytes = WriteBuffer();
+    for (Plane plane in _savedImage!.planes) {
+      allBytes.putUint8List(plane.bytes);
+    }
+    final bytes = allBytes.done().buffer.asUint8List();
+
+    final Size imageSize =
+        Size(_savedImage!.width.toDouble(), _savedImage!.height.toDouble());
+
+    final InputImageRotation imageRotation =
+        InputImageRotationMethods.fromRawValue(
+                widget.cameras[0].sensorOrientation) ??
+            InputImageRotation.Rotation_0deg;
+
+    final InputImageFormat inputImageFormat =
+        InputImageFormatMethods.fromRawValue(_savedImage?.format.raw) ??
+            InputImageFormat.NV21;
+
+    final planeData = _savedImage?.planes.map(
+      (Plane plane) {
+        return InputImagePlaneMetadata(
+          bytesPerRow: plane.bytesPerRow,
+          height: plane.height,
+          width: plane.width,
+        );
+      },
+    ).toList();
+
+    final inputImageData = InputImageData(
+      size: imageSize,
+      imageRotation: imageRotation,
+      inputImageFormat: inputImageFormat,
+      planeData: planeData,
+    );
+
+    final inputImage =
+        InputImage.fromBytes(bytes: bytes, inputImageData: inputImageData);
+
+    final textDetector = GoogleMlKit.vision.textDetector();
+
+    final RecognisedText recognisedText =
+        await textDetector.processImage(inputImage);
+
+    String text = recognisedText.text;
+
+    textDetector.close();
+
+    if (text.length >= 5) {
+      String code = text.substring(0, 5);
+      if (!_isNumeric(code)) {
+        return;
+      }
+
+      setState(() {
+        _textToShow = code; //take only first 5 characters
+      });
+    }
+  }
+
+  bool _isNumeric(String? s) {
+    if (s == null) {
+      return false;
+    }
+    return int.tryParse(s) != null;
   }
 
   @override
@@ -42,9 +128,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.camera_alt),
           onPressed: () {
-
-            
-            setState(() => _textToShow = "Camera Btn Pressed!");
+            _tryToGetText();
           },
         ),
         appBar: AppBar(title: Text("Camera Preview")),
@@ -56,20 +140,34 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                   child: CircularProgressIndicator(
                   semanticsLabel: "Camera Initializing",
                 ))
-              : SizedBox(
-                  width: constraint.maxWidth,
-                  height: constraint.maxHeight,
-                  child: Column(children: [
-                    AspectRatio(
-                        child: CameraPreview(_controller),
-                        aspectRatio: 1.0 / _controller.value.aspectRatio),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                          child: Text(_textToShow,
-                              style: TextStyle(color: Colors.white))),
-                    )
-                  ]),
+              : GestureDetector(
+                  onScaleStart: (_) {
+                    _previousScale = _scale;
+                  },
+                  onScaleUpdate: (scaleUpdateDetails) {
+                    _scale = _previousScale * scaleUpdateDetails.scale;
+                    _scale > 10.0 ? 10.0 : _scale;
+                    _scale < 1.0 ? 1.0 : _scale;
+                    _controller.setZoomLevel(_scale);
+                  },
+                  onScaleEnd: (_) {
+                    _previousScale = 1.0;
+                  },
+                  child: SizedBox(
+                    width: constraint.maxWidth,
+                    height: constraint.maxHeight,
+                    child: Column(children: [
+                      AspectRatio(
+                          child: CameraPreview(_controller),
+                          aspectRatio: 1.0 / _controller.value.aspectRatio),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
+                            child: Text(_textToShow,
+                                style: TextStyle(color: Colors.white))),
+                      )
+                    ]),
+                  ),
                 );
         }));
   }
@@ -81,6 +179,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       return;
     }
     if (state == AppLifecycleState.inactive) {
+      _controller.stopImageStream();
       _controller.dispose();
       setState(() => _controllerInitialized = false);
     } else if (state == AppLifecycleState.resumed) {
@@ -94,7 +193,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
     _controller = CameraController(
       cameraDescription,
-      ResolutionPreset.medium,
+      ResolutionPreset.high,
     );
 
     try {
@@ -104,6 +203,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     }
 
     if (mounted) {
+      _startStreaming();
       setState(() {
         _controllerInitialized = true;
       });
@@ -113,6 +213,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance?.removeObserver(this);
+    _controller.stopImageStream();
     _controller.dispose();
     setState(() {
       _controllerInitialized = false;
