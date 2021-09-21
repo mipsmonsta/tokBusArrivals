@@ -20,6 +20,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   CameraImage? _savedImage;
   double _previousScale = 1.0;
   double _scale = 1.0;
+  bool _busPoleVisibility = true;
 
   @override
   void initState() {
@@ -35,6 +36,13 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       _startStreaming();
 
       setState(() => _controllerInitialized = true);
+    });
+
+    Future.delayed(Duration(seconds: 5)).then((_) {
+      //hide bus stop pole image after 5 seconds
+      setState(() {
+        _busPoleVisibility = false;
+      });
     });
   }
 
@@ -158,8 +166,18 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                     height: constraint.maxHeight,
                     child: Column(children: [
                       AspectRatio(
-                          child: CameraPreview(_controller),
-                          aspectRatio: 1.0 / _controller.value.aspectRatio),
+                          aspectRatio: 1.0 / _controller.value.aspectRatio,
+                          child: CameraPreview(_controller,
+                              child: Visibility(
+                                visible: _busPoleVisibility,
+                                child: IgnorePointer(
+                                  child: Center(
+                                      child: Image(
+                                          opacity: AlwaysStoppedAnimation(0.6),
+                                          image: AssetImage(
+                                              'assets/images/bus_pole_sample.png'))),
+                                ),
+                              ))),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Center(
