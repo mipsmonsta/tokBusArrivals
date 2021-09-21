@@ -52,7 +52,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   }
 
   void _processedCameraImage(CameraImage image) {
-    setState(() => _savedImage = image);
+    if (mounted) setState(() => _savedImage = image);
   }
 
   void _tryToGetText() async {
@@ -125,6 +125,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   }
 
   Future<bool> _onWillPop() {
+    _controller.stopImageStream();
     Navigator.of(context).pop(_textToShow);
     return Future.value(true);
   }
@@ -190,7 +191,8 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                                     child: Text(_textToShow,
                                         style: TextStyle(
                                             color: Colors.white,
-                                            fontWeight: FontWeight.bold)))
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 30)))
                               ],
                             ),
                           ),
@@ -242,11 +244,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    _controller.stopImageStream();
     _controller.dispose();
-    setState(() {
-      _controllerInitialized = false;
-    });
     WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }

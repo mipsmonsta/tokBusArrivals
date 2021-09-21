@@ -185,6 +185,12 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                     keyboardType: TextInputType.number,
                     maxLength: 5,
                     decoration: InputDecoration(
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.search),
+                          onPressed: () {
+                            _onCodeSubmitted(_textEditingController.value.text);
+                          },
+                        ),
                         hintText: "5 digit bus stop code e.g. 65209",
                         icon: Icon(Icons.hail))));
           }),
