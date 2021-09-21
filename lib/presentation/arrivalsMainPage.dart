@@ -28,6 +28,7 @@ class ArrivalsMainPage extends StatefulWidget {
 
 class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
   String _inputtedCode = "";
+  TextEditingController _textEditingController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -156,8 +157,13 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                 }),
             IconButton(
                 icon: const Icon(Icons.camera),
-                onPressed: () {
-                  Navigator.of(context).pushNamed("/camera");
+                onPressed: () async {
+                  // String? code =
+                  //     await Navigator.of(context).pushNamed("/camera");
+                  var code = await Navigator.of(context).pushNamed("/camera");
+                  if (code != null && (code as String).length > 0) {
+                    _textEditingController.value = TextEditingValue(text: code);
+                  }
                 }),
           ],
         ),
@@ -174,6 +180,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                     //? const EdgeInsets.fromLTRB(8.0, 52.0, 8.0, 0) :
                     const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
                 child: TextField(
+                    controller: _textEditingController,
                     onSubmitted: _onCodeSubmitted,
                     keyboardType: TextInputType.number,
                     maxLength: 5,

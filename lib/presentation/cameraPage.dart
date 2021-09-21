@@ -124,6 +124,11 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     return int.tryParse(s) != null;
   }
 
+  Future<bool> _onWillPop() {
+    Navigator.of(context).pop(_textToShow);
+    return Future.value(true);
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -140,54 +145,61 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
           },
         ),
         appBar: AppBar(title: Text("Camera Preview")),
-        body: LayoutBuilder(builder: (ctx, constraint) {
-          //print("$constraint.maxHeight, $constraint.width");
+        body: WillPopScope(
+          onWillPop: _onWillPop,
+          child: LayoutBuilder(builder: (ctx, constraint) {
+            //print("$constraint.maxHeight, $constraint.width");
 
-          return (!_controllerInitialized)
-              ? Center(
-                  child: CircularProgressIndicator(
-                  semanticsLabel: "Camera Initializing",
-                ))
-              : GestureDetector(
-                  onScaleStart: (_) {
-                    _previousScale = _scale;
-                  },
-                  onScaleUpdate: (scaleUpdateDetails) {
-                    _scale = _previousScale * scaleUpdateDetails.scale;
-                    _scale > 10.0 ? 10.0 : _scale;
-                    _scale < 1.0 ? 1.0 : _scale;
-                    _controller.setZoomLevel(_scale);
-                  },
-                  onScaleEnd: (_) {
-                    _previousScale = 1.0;
-                  },
-                  child: SizedBox(
-                    width: constraint.maxWidth,
-                    height: constraint.maxHeight,
-                    child: Column(children: [
-                      AspectRatio(
-                          aspectRatio: 1.0 / _controller.value.aspectRatio,
-                          child: CameraPreview(_controller,
-                              child: Visibility(
-                                visible: _busPoleVisibility,
-                                child: IgnorePointer(
-                                  child: Center(
-                                      child: Image(
-                                          opacity: AlwaysStoppedAnimation(0.6),
-                                          image: AssetImage(
-                                              'assets/images/bus_pole_sample.png'))),
-                                ),
-                              ))),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                            child: Text(_textToShow,
-                                style: TextStyle(color: Colors.white))),
-                      )
-                    ]),
-                  ),
-                );
-        }));
+            return (!_controllerInitialized)
+                ? Center(
+                    child: CircularProgressIndicator(
+                    semanticsLabel: "Camera Initializing",
+                  ))
+                : GestureDetector(
+                    onScaleStart: (_) {
+                      _previousScale = _scale;
+                    },
+                    onScaleUpdate: (scaleUpdateDetails) {
+                      _scale = _previousScale * scaleUpdateDetails.scale;
+                      _scale > 10.0 ? 10.0 : _scale;
+                      _scale < 1.0 ? 1.0 : _scale;
+                      _controller.setZoomLevel(_scale);
+                    },
+                    onScaleEnd: (_) {
+                      _previousScale = 1.0;
+                    },
+                    child: SizedBox(
+                      width: constraint.maxWidth,
+                      height: constraint.maxHeight,
+                      child: AspectRatio(
+                        aspectRatio: 1.0 / _controller.value.aspectRatio,
+                        child: CameraPreview(
+                          _controller,
+                          child: IgnorePointer(
+                            child: Stack(
+                              children: [
+                                Visibility(
+                                    visible: _busPoleVisibility,
+                                    child: Center(
+                                        child: Image(
+                                            opacity:
+                                                AlwaysStoppedAnimation(0.6),
+                                            image: AssetImage(
+                                                'assets/images/bus_pole_sample.png')))),
+                                Center(
+                                    child: Text(_textToShow,
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold)))
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+          }),
+        ));
   }
 
   @override
@@ -230,12 +242,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
     _controller.stopImageStream();
     _controller.dispose();
     setState(() {
       _controllerInitialized = false;
     });
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 }
