@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
+import '../utility/string_extensions.dart';
 
 class CameraPage extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -107,7 +108,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
     if (text.length >= 5) {
       String code = text.substring(0, 5);
-      if (!_isNumeric(code)) {
+      if (!code.isNumeric()) {
         return;
       }
 
@@ -115,13 +116,6 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         _textToShow = code; //take only first 5 characters
       });
     }
-  }
-
-  bool _isNumeric(String? s) {
-    if (s == null) {
-      return false;
-    }
-    return int.tryParse(s) != null;
   }
 
   Future<bool> _onWillPop() {

@@ -118,6 +118,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_beep:
+    dependency: "direct main"
+    description:
+      name: flutter_beep
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   flutter_bloc:
     dependency: "direct main"
     description:
@@ -198,6 +205,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.3"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.1.0"
   matcher:
     dependency: transitive
     description:
@@ -322,6 +336,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.1"
+  speech_to_text:
+    dependency: "direct main"
+    description:
+      name: speech_to_text
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.1.1"
+  speech_to_text_platform_interface:
+    dependency: transitive
+    description:
+      name: speech_to_text_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   stack_trace:
     dependency: transitive
     description:

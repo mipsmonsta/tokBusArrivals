@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:meta_bus_arrivals_api/meta_bus_arrivals_api.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryBloc.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryEvent.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryState.dart';
@@ -10,6 +13,7 @@ import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
 import 'package:tokbusarrival/widget/minuteTag.dart';
 import 'package:tokbusarrival/widget/operatorColorIcon.dart';
+import '../utility/string_extensions.dart';
 
 class ArrivalsMainPage extends StatefulWidget {
   ArrivalsMainPage({Key? key}) : super(key: key);
@@ -27,12 +31,54 @@ class ArrivalsMainPage extends StatefulWidget {
 }
 
 class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
+  SpeechToText _speechToText = SpeechToText();
+  bool _speechEnabled = false;
+  bool _isSpeechListening = false;
   String _inputtedCode = "";
   TextEditingController _textEditingController = TextEditingController();
   @override
   void initState() {
     super.initState();
     initializeDateFormatting('en_SG', null);
+    _enableSpeech();
+  }
+
+  void _enableSpeech() async {
+    _speechEnabled =
+        await _speechToText.initialize(onStatus: _onSpeechStatusChange);
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  void _startListening() async {
+    await _speechToText.listen(onResult: _onSpeechResult);
+
+    FlutterBeep.beep();
+
+    setState(() {});
+  }
+
+  void _onSpeechResult(SpeechRecognitionResult result) {
+    String potential = result.recognizedWords;
+    if (potential.length >= 5) {
+      potential = potential.substring(0, 5);
+      if (potential.isNumeric()) {
+        _textEditingController.value = TextEditingValue(text: potential);
+      }
+    }
+  }
+
+  void _onSpeechStatusChange(String status) {
+    if (status == "listening") {
+      _isSpeechListening = true;
+    } else {
+      _isSpeechListening = false;
+    }
+    setState(() {});
+  }
+
+  void _stopListening() async {
+    await _speechToText.stop();
   }
 
   void _onCodeSubmitted(String code) {
@@ -144,7 +190,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
       child: Scaffold(
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
+          // the App.build method, and use it to set our appbar title
           title: Text("Bus Arrivals @ Stop"),
           actions: [
             IconButton(
@@ -167,6 +213,16 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                 }),
           ],
         ),
+        floatingActionButton: _speechEnabled
+            ? FloatingActionButton(
+                child:
+                    Icon(_speechToText.isListening ? Icons.mic : Icons.mic_off),
+                onPressed: () {
+                  _speechToText.isListening
+                      ? _stopListening()
+                      : _startListening();
+                })
+            : null,
         body: Center(
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.start, children: [
