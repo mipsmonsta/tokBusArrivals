@@ -63,7 +63,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
     if (potential.length >= 5) {
       potential = potential.substring(0, 5);
       if (potential.isNumeric()) {
-        _textEditingController.value = TextEditingValue(text: potential);
+        _showOnBusTextFieldAndSearch(potential);
       }
     }
   }
@@ -86,6 +86,11 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
     context
         .read<ArrivalsQueryBloc>()
         .add(ArrivalsSeekingBusStopCodeEvent(code));
+  }
+
+  void _showOnBusTextFieldAndSearch(String numericCode) {
+    _textEditingController.value = TextEditingValue(text: numericCode);
+    _onCodeSubmitted(numericCode);
   }
 
   String _createSpeechFromServices(List<Service> services) {
@@ -210,7 +215,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                   //     await Navigator.of(context).pushNamed("/camera");
                   var code = await Navigator.of(context).pushNamed("/camera");
                   if (code != null && (code as String).length > 0) {
-                    _textEditingController.value = TextEditingValue(text: code);
+                    _showOnBusTextFieldAndSearch(code);
                   }
                 }),
           ],
@@ -226,66 +231,76 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                 })
             : null,
         body: Center(
-            child:
-                Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-          Builder(builder: (context) {
-            // bool isSpeechMute = context
-            //     .watch<SpeechMuteCubit>()
-            //     .state; //Adjust space for materialbanner if speech is muted
+            child: Container(
+          decoration: BoxDecoration(
+              image: DecorationImage(
+                  colorFilter: ColorFilter.mode(
+                      Colors.lightGreenAccent.withOpacity(0.2),
+                      BlendMode.dstATop),
+                  image: AssetImage('assets/images/lovebus.png'),
+                  fit: BoxFit.cover)),
+          child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+            Builder(builder: (context) {
+              // bool isSpeechMute = context
+              //     .watch<SpeechMuteCubit>()
+              //     .state; //Adjust space for materialbanner if speech is muted
 
-            return Padding(
-                padding: //isSpeechMute
-                    //? const EdgeInsets.fromLTRB(8.0, 52.0, 8.0, 0) :
-                    const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-                child: TextField(
-                    controller: _textEditingController,
-                    onSubmitted: _onCodeSubmitted,
-                    keyboardType: TextInputType.number,
-                    maxLength: 5,
-                    decoration: InputDecoration(
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.search),
-                          onPressed: () {
-                            _onCodeSubmitted(_textEditingController.value.text);
-                          },
-                        ),
-                        hintText: "5 digit bus stop code e.g. 65209",
-                        icon: Icon(Icons.hail))));
-          }),
-          BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
-            builder: (context, state) {
-              Widget resultWidget;
-              switch (state.runtimeType) {
-                case ArrivalsQueryStateLoading:
-                  resultWidget = Center(child: CircularProgressIndicator());
-                  break;
+              return Padding(
+                  padding: //isSpeechMute
+                      //? const EdgeInsets.fromLTRB(8.0, 52.0, 8.0, 0) :
+                      const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                  child: TextField(
+                      controller: _textEditingController,
+                      onSubmitted: _onCodeSubmitted,
+                      keyboardType: TextInputType.number,
+                      maxLength: 5,
+                      decoration: InputDecoration(
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.search),
+                            onPressed: () {
+                              _onCodeSubmitted(
+                                  _textEditingController.value.text);
+                            },
+                          ),
+                          hintText: "5 digit bus stop code e.g. 65209",
+                          icon: Icon(Icons.hail))));
+            }),
+            BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
+              builder: (context, state) {
+                Widget resultWidget;
+                switch (state.runtimeType) {
+                  case ArrivalsQueryStateLoading:
+                    resultWidget = Center(child: CircularProgressIndicator());
+                    break;
 
-                case ArrivalsQueryStateError:
-                  var errorText = (state as ArrivalsQueryStateError).error;
-                  resultWidget =
-                      Center(child: Text("Error Getting Arrivals: $errorText"));
-                  break;
+                  case ArrivalsQueryStateError:
+                    var errorText = (state as ArrivalsQueryStateError).error;
+                    resultWidget = Center(
+                        child: Text("Error Getting Arrivals: $errorText"));
+                    break;
 
-                case ArrivalsQueryStateSuccess:
-                  var services = (state as ArrivalsQueryStateSuccess).services;
-                  var preparedSpeech = _createSpeechFromServices(services);
+                  case ArrivalsQueryStateSuccess:
+                    var services =
+                        (state as ArrivalsQueryStateSuccess).services;
+                    var preparedSpeech = _createSpeechFromServices(services);
 
-                  context
-                      .read<SpeechReadingBloc>()
-                      .add(SpeechStartLoadingReadingEvent(preparedSpeech));
-                  //print(services);
-                  resultWidget = getListViewBasedOnServices(services);
-                  break;
-                case ArrivalsQueryStateEmpty:
-                default:
-                  resultWidget = Center(child: Text("No results"));
-                  break;
-              }
+                    context
+                        .read<SpeechReadingBloc>()
+                        .add(SpeechStartLoadingReadingEvent(preparedSpeech));
+                    //print(services);
+                    resultWidget = getListViewBasedOnServices(services);
+                    break;
+                  case ArrivalsQueryStateEmpty:
+                  default:
+                    resultWidget = Center(child: Text("No results"));
+                    break;
+                }
 
-              return resultWidget;
-            },
-          )
-        ])),
+                return resultWidget;
+              },
+            )
+          ]),
+        )),
       ),
     );
   }
