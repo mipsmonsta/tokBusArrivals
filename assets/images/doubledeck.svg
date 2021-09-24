@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1024px"
+   height="1024px"
+   viewBox="0 0 1024 1024"
+   version="1.1"
+   id="SVGRoot"
+   sodipodi:docname="doubledeck.svg"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   inkscape:export-filename="C:\Users\yaoji\Documents\Drawing\output\doubledeck.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview320"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="0.67081229"
+     inkscape:cx="185.59588"
+     inkscape:cy="560.51448"
+     inkscape:window-width="1800"
+     inkscape:window-height="1106"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer2" />
+  <defs
+     id="defs315" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer 2">
+    <path
+       id="rect371"
+       style="fill:#000000;fill-rule:evenodd"
+       d="M 345.84961 251.93359 C 316.11849 251.93359 292.18359 275.86849 292.18359 305.59961 L 292.18359 669.33789 C 292.18359 699.06901 316.11849 723.00391 345.84961 723.00391 L 690.20703 723.00391 C 719.93815 723.00391 743.875 699.06901 743.875 669.33789 L 743.875 305.59961 C 743.875 275.86849 719.93815 251.93359 690.20703 251.93359 L 345.84961 251.93359 z M 363.73828 305.59961 L 678.28125 305.59961 L 678.28125 442.74609 L 363.73828 442.74609 L 363.73828 305.59961 z M 366.71875 485.97852 L 681.26367 485.97852 L 681.26367 602.25586 L 366.71875 602.25586 L 366.71875 485.97852 z M 654.42969 630.57812 A 26.833139 29.8146 0 0 1 664.66602 632.83984 A 26.833139 29.8146 0 0 1 664.73047 632.87109 A 26.833139 29.8146 0 0 1 673.36719 639.2832 A 26.833139 29.8146 0 0 1 673.42773 639.35156 A 26.833139 29.8146 0 0 1 679.20312 648.95312 A 26.833139 29.8146 0 0 1 679.22656 649.01367 A 26.833139 29.8146 0 0 1 681.26367 660.39258 A 26.833139 29.8146 0 0 1 679.2832 671.45117 A 26.833139 29.8146 0 0 1 679.0957 672.00977 A 26.833139 29.8146 0 0 1 673.59766 681.15234 A 26.833139 29.8146 0 0 1 673.11328 681.68945 A 26.833139 29.8146 0 0 1 664.88086 687.80273 A 26.833139 29.8146 0 0 1 664.39062 688.00586 A 26.833139 29.8146 0 0 1 654.42969 690.20703 A 26.833139 29.8146 0 0 1 644.4707 688.00586 A 26.833139 29.8146 0 0 1 643.98047 687.80273 A 26.833139 29.8146 0 0 1 635.74414 681.6875 A 26.833139 29.8146 0 0 1 635.26562 681.15625 A 26.833139 29.8146 0 0 1 629.76172 672.00195 A 26.833139 29.8146 0 0 1 629.58008 671.46289 A 26.833139 29.8146 0 0 1 627.59766 660.39258 A 26.833139 29.8146 0 0 1 629.58008 649.32617 A 26.833139 29.8146 0 0 1 629.76172 648.7793 A 26.833139 29.8146 0 0 1 635.26172 639.63477 A 26.833139 29.8146 0 0 1 635.75 639.09375 A 26.833139 29.8146 0 0 1 643.97461 632.98633 A 26.833139 29.8146 0 0 1 644.48047 632.77734 A 26.833139 29.8146 0 0 1 654.42969 630.57812 z M 384.60742 633.56055 A 26.833139 29.8146 0 0 1 411.44141 663.375 A 26.833139 29.8146 0 0 1 384.60742 693.18945 A 26.833139 29.8146 0 0 1 357.77539 663.375 A 26.833139 29.8146 0 0 1 384.60742 633.56055 z " />
+    <rect
+       style="fill:#000000"
+       id="rect725"
+       width="59.6292"
+       height="62.610661"
+       x="354.79373"
+       y="718.53186" />
+    <rect
+       style="fill:#000000"
+       id="rect749"
+       width="56.647739"
+       height="62.610661"
+       x="624.61584"
+       y="717.04114" />
+    <rect
+       style="fill:#000000"
+       id="rect773"
+       width="52.175549"
+       height="76.027229"
+       x="251.93336"
+       y="384.60834" />
+    <rect
+       style="fill:#000000"
+       id="rect775"
+       width="52.175549"
+       height="76.027229"
+       x="727.4762"
+       y="380.13614" />
+  </g>
+</svg>

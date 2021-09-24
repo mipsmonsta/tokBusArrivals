@@ -12,7 +12,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
 import 'package:tokbusarrival/widget/minuteTag.dart';
-import 'package:tokbusarrival/widget/operatorColorIcon.dart';
+import 'package:tokbusarrival/widget/operatorBusTypeColorIcon.dart';
 import '../utility/string_extensions.dart';
 
 class ArrivalsMainPage extends StatefulWidget {
@@ -162,8 +162,10 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
 
                     return Center(
                         child: ListTile(
-                      leading: OperatorColorIcon(Icons.bus_alert,
-                          operatorName: service.busOperator),
+                      leading: OperatorBusTypeColorIcon(
+                        operatorName: service.busOperator,
+                        busType: service.bus1?.type ?? "SD",
+                      ),
                       title: Text(service.number),
                       subtitle: Text("Next Buses in: $time1 $time2 $time3"),
                       trailing: MinuteTag(

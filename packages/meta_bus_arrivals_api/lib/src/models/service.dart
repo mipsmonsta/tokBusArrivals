@@ -3,18 +3,21 @@
 class NextBus {
   late DateTime estimatedArrival; //2017-04-29T07:20:24+08:00
   late String capacity; //SEA, SDA, LSD
+  late String type; //SD, DD, BD
 
   NextBus();
 
   NextBus.fromJson(Map<String, dynamic> json) {
     this.estimatedArrival = DateTime.parse(json['EstimatedArrival']);
     this.capacity = json['Load'];
+    this.type = json['Type'];
   }
 
   Map<String, dynamic> toJson() {
     return {
       'EstimatedArrival': estimatedArrival,
       'Load': capacity,
+      'Type': type,
     };
   }
 }

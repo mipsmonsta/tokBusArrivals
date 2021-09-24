@@ -256,7 +256,8 @@ void main() {
                 .having((l) => l[0].bus2 == null, 'bus2', true)
                 .having((l) => l[1].bus3 == null, 'bus3', true)
                 .having((l) => l[0].busOperator, 'busOperator', 'SMRT')
-                .having((l) => l[0].number, 'bus service number', '176'));
+                .having((l) => l[0].number, 'bus service number', '176')
+                .having((l) => l[0].bus1?.type, 'bus type', 'DD'));
       });
     });
   });
