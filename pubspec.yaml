@@ -35,7 +35,6 @@ dependencies:
   google_ml_kit: ^0.7.2
   camera: ^0.9.3
   speech_to_text: ^5.1.1
-  flutter_beep: ^1.0.0
   flutter_svg: ^0.22.0
 
 

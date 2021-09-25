@@ -1,13 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-abstract class SpeechReadingState extends Equatable {
-  dynamic aProps = const [];
-
-  SpeechReadingState([this.aProps]);
-
-  @override
-  List<Object?> get props => [...aProps];
-}
+abstract class SpeechReadingState extends Equatable {}
 
 class SpeechPreparingState extends SpeechReadingState {
   //state when no speech is ready
@@ -17,17 +10,23 @@ class SpeechPreparingState extends SpeechReadingState {
   String toString() {
     return this.runtimeType.toString();
   }
+
+  @override
+  List<Object?> get props => [];
 }
 
 class SpeechLoadedState extends SpeechReadingState {
   final String speech;
 
-  SpeechLoadedState(this.speech) : super([speech]);
+  SpeechLoadedState(this.speech);
 
   @override
   String toString() {
     return this.runtimeType.toString();
   }
+
+  @override
+  List<Object?> get props => [speech];
 }
 
 class SpeechPlayingState extends SpeechReadingState {
@@ -37,6 +36,9 @@ class SpeechPlayingState extends SpeechReadingState {
   String toString() {
     return this.runtimeType.toString();
   }
+
+  @override
+  List<Object?> get props => [];
 }
 
 // class SpeechStopState extends SpeechReadingState {
