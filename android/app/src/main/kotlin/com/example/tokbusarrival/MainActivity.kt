@@ -1,4 +1,4 @@
-package com.example.tokbusarrival
+package com.shibainusoft.tokbusarrival
 
 import io.flutter.embedding.android.FlutterActivity
 
