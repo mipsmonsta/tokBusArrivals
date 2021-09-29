@@ -10,6 +10,7 @@ import 'package:tokbusarrival/bloc/arrivalsQueryState.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
+import 'package:tokbusarrival/widget/SayDigitsSnackBar.dart';
 import 'package:tokbusarrival/widget/minuteTag.dart';
 import 'package:tokbusarrival/widget/operatorBusTypeColorIcon.dart';
 import '../utility/string_extensions.dart';
@@ -73,6 +74,12 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
     setState(() {
       _isSpeechListening = value;
     });
+
+    if (value) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SayDigitsSnackBar());
+    } else {
+      ScaffoldMessenger.maybeOf(context)?.hideCurrentSnackBar();
+    }
   }
 
   void _stopListening() async {
@@ -316,6 +323,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
 
   @override
   void dispose() {
+    context.read<SpeechReadingBloc>().add(SpeechStopReadingEvent());
     super.dispose();
   }
 }
