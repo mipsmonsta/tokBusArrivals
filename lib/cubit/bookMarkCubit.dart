@@ -1,6 +1,7 @@
+import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
-class BookMark {
+class BookMark extends Equatable {
   final String busStopCode;
   final String desc;
 
@@ -13,6 +14,10 @@ class BookMark {
   Map<String, dynamic>? toJson() {
     return {'busStopCode': busStopCode, 'description': desc};
   }
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [busStopCode, desc];
 }
 
 class BookMarkCubit extends HydratedCubit<List<BookMark>> {

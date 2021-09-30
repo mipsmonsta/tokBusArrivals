@@ -82,8 +82,11 @@ void main() {
       },
       expect: () => [
         [oneBookMark],
-        [oneBookMark, secondBookMark],
-        [secondBookMark],
+        [
+          secondBookMark,
+          oneBookMark
+        ], //bookmarks are added from front of arrray
+        [oneBookMark],
       ],
     );
 
@@ -97,8 +100,8 @@ void main() {
       },
       expect: () => [
         [oneBookMark],
-        [oneBookMark, secondBookMark],
-        [oneBookMark],
+        [secondBookMark, oneBookMark],
+        [secondBookMark],
       ],
     );
   });
