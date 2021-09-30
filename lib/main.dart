@@ -9,6 +9,7 @@ import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/cubit/SpeechMuteCubit.dart';
 import 'package:tokbusarrival/cubit/SpeechPitchCubit.dart';
 import 'package:tokbusarrival/cubit/SpeechRateCubit.dart';
+import 'package:tokbusarrival/cubit/bookMarkCubit.dart';
 import 'package:tokbusarrival/presentation/arrivalsMainPage.dart';
 import 'package:tokbusarrival/presentation/speechSettingsPage.dart';
 
@@ -78,7 +79,10 @@ class MyApp extends StatelessWidget {
             // is not restarted.
             primarySwatch: Colors.lightGreen),
         routes: {
-          '/': (_) => ArrivalsMainPage(),
+          '/': (_) => BlocProvider(
+                create: (_) => BookMarkCubit(),
+                child: ArrivalsMainPage(),
+              ),
           '/settings': (_) => SpeechSettingsPage(),
           '/camera': (_) => CameraPage(cameras: cameras),
         },

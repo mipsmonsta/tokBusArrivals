@@ -10,7 +10,9 @@ import 'package:tokbusarrival/bloc/arrivalsQueryState.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
+import 'package:tokbusarrival/cubit/bookMarkCubit.dart';
 import 'package:tokbusarrival/widget/SayDigitsSnackBar.dart';
+import 'package:tokbusarrival/widget/bookMarkPageView.dart';
 import 'package:tokbusarrival/widget/minuteTag.dart';
 import 'package:tokbusarrival/widget/operatorBusTypeColorIcon.dart';
 import '../utility/string_extensions.dart';
@@ -129,6 +131,51 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
     _onCodeSubmitted(_textEditingController.value.text);
   }
 
+  void _onBookMarkPressed(int index) {
+    var busStopCode = context.read<BookMarkCubit>().state[index].busStopCode;
+    _showOnBusTextFieldAndSearch(busStopCode);
+  }
+
+  void _onBooKMarkLongPressed(int index) async {
+    bool? isToDelete = await _showAlertDialog();
+    if (isToDelete == true) {
+      context.read<BookMarkCubit>().removeBookMark(index);
+    }
+  }
+
+  Future<bool?> _showAlertDialog() async {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Bookmark'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text('Delete Bus Stop bookmark?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget getListViewBasedOnServices(List<Service> services) {
     return Expanded(
         child: RefreshIndicator(
@@ -186,6 +233,38 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                 },
                 itemCount: services.length + 1) // +1 for update time item,
             ));
+  }
+
+  Widget _getCompoundBusCodeTextField(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+              controller: _textEditingController,
+              onSubmitted: _onCodeSubmitted,
+              keyboardType: TextInputType.number,
+              maxLength: 5,
+              decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      _onCodeSubmitted(_textEditingController.value.text);
+                    },
+                  ),
+                  hintText: "5 digit bus stop code e.g. 65209",
+                  icon: Icon(Icons.hail))),
+        ),
+        Container(
+            alignment: Alignment.topCenter,
+            child: IconButton(
+              icon: Icon(Icons.bookmark, color: Colors.grey),
+              onPressed: () {
+                context.read<BookMarkCubit>().addBookMark(
+                    BookMark(_textEditingController.value.text, ""));
+              },
+            ))
+      ],
+    );
   }
 
   @override
@@ -260,30 +339,18 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                     fit: BoxFit.cover)),
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-              Builder(builder: (context) {
-                // bool isSpeechMute = context
-                //     .watch<SpeechMuteCubit>()
-                //     .state; //Adjust space for materialbanner if speech is muted
-
-                return Padding(
-                    padding: //isSpeechMute
-                        //? const EdgeInsets.fromLTRB(8.0, 52.0, 8.0, 0) :
-                        const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-                    child: TextField(
-                        controller: _textEditingController,
-                        onSubmitted: _onCodeSubmitted,
-                        keyboardType: TextInputType.number,
-                        maxLength: 5,
-                        decoration: InputDecoration(
-                            suffixIcon: IconButton(
-                              icon: Icon(Icons.search),
-                              onPressed: () {
-                                _onCodeSubmitted(
-                                    _textEditingController.value.text);
-                              },
-                            ),
-                            hintText: "5 digit bus stop code e.g. 65209",
-                            icon: Icon(Icons.hail))));
+              _getCompoundBusCodeTextField(context),
+              BlocBuilder<BookMarkCubit, List<BookMark>>(
+                  builder: (context, state) {
+                if (state.length == 0) return SizedBox.shrink();
+                return BookMarkPageView(
+                  width: MediaQuery.of(context).size.width,
+                  height: 60.0,
+                  bookmarkCodeList: List<String>.generate(
+                      state.length, (index) => state[index].busStopCode),
+                  onBookMarkPressedCallback: _onBookMarkPressed,
+                  onBookMarkLongPressedCallback: _onBooKMarkLongPressed,
+                );
               }),
               BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
                 builder: (context, state) {
@@ -313,7 +380,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
 
                   return resultWidget;
                 },
-              )
+              ),
             ]),
           )),
         ),
