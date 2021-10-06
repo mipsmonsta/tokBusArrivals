@@ -46,3 +46,5 @@ app.*.map.json
 /android/app/release
 
 key.properties
+#hide the bus stop generated file by package bus_stops
+assets/files/bus_stop* 

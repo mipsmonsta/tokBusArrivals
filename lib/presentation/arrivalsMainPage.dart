@@ -1,5 +1,7 @@
+import 'package:bus_stops/bus_stops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:meta_bus_arrivals_api/meta_bus_arrivals_api.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -10,12 +12,22 @@ import 'package:tokbusarrival/bloc/arrivalsQueryState.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
+import 'package:tokbusarrival/bloc/stopsHiveBloc.dart';
+import 'package:tokbusarrival/bloc/stopsHiveEvent.dart';
+import 'package:tokbusarrival/bloc/stopsHiveState.dart';
 import 'package:tokbusarrival/cubit/bookMarkCubit.dart';
+import 'package:tokbusarrival/utility/utility.dart';
 import 'package:tokbusarrival/widget/SayDigitsSnackBar.dart';
 import 'package:tokbusarrival/widget/bookMarkPageView.dart';
+import 'package:tokbusarrival/widget/cannotGetNearbyBusStopSnackBar%20copy.dart';
+import 'package:tokbusarrival/widget/locationNASnackBar.dart';
 import 'package:tokbusarrival/widget/minuteTag.dart';
 import 'package:tokbusarrival/widget/operatorBusTypeColorIcon.dart';
+import 'package:tokbusarrival/widget/utilityDialog.dart';
 import '../utility/string_extensions.dart';
+
+// add new types for more pop up menu items
+enum PopUpMenuTypes { nearestBus, about }
 
 class ArrivalsMainPage extends StatefulWidget {
   ArrivalsMainPage({Key? key}) : super(key: key);
@@ -36,12 +48,18 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
   SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   bool _isSpeechListening = false;
+  bool _isBusStopDBLoaded = false;
+  String _busStopDescription = "";
+
   TextEditingController _textEditingController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     initializeDateFormatting('en_SG', null);
     _enableSpeech();
+    //Prepare Bus Stop Hive
+    context.read<StopsHiveBloc>().add(StopsHiveCheckLoadedEvent());
   }
 
   void _enableSpeech() async {
@@ -88,10 +106,23 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
     await _speechToText.stop();
   }
 
-  void _onCodeSubmitted(String code) {
+  void _onCodeSubmitted(String code) async {
     context
         .read<ArrivalsQueryBloc>()
         .add(ArrivalsSeekingBusStopCodeEvent(code));
+
+    if (_isBusStopDBLoaded) {
+      Stop? busStop = await context.read<StopsHiveBloc>().box.get(code);
+      String? busStopDesc = busStop?.description;
+      String? busStopRoadName = busStop?.roadName;
+      if (busStopDesc != null) {
+        _busStopDescription = "$busStopDesc along $busStopRoadName";
+      } else
+        _busStopDescription = "";
+    } else
+      _busStopDescription = "";
+
+    setState(() {}); //for _busStopDescription
   }
 
   void _showOnBusTextFieldAndSearch(String numericCode) {
@@ -141,6 +172,56 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
     if (isToDelete == true) {
       context.read<BookMarkCubit>().removeBookMark(index);
     }
+  }
+
+  void _getNearestBusStopCode(BuildContext context) async {
+    Position currPosition;
+
+    try {
+      UtilityDialog.showLoaderDialog(context, "Finding nearby bus stop...");
+      currPosition = await Utility.determinePosition();
+      if (_isBusStopDBLoaded) {
+        String? result = // Get Bus Stop Code based on GPS coordinates.
+            context.read<StopsHiveBloc>().nearestBusStopCode(currPosition);
+        if (result != null) {
+          _showOnBusTextFieldAndSearch(result);
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(CannotGetNearbyBusStopSnackBar());
+        }
+      }
+    } catch (e) {
+      print(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(LocationNASnackBar());
+    } finally {
+      Navigator.of(context).pop(); // remove Loader Dialog
+    }
+  }
+
+  Widget _getPopupMenuButton(BuildContext context) {
+    void onSelected(PopUpMenuTypes typeSelected) {
+      switch (typeSelected) {
+        case PopUpMenuTypes.nearestBus:
+          _getNearestBusStopCode(context);
+          break;
+        case PopUpMenuTypes.about:
+          UtilityDialog.showCustomAboutDialog(context);
+          break;
+      }
+    }
+
+    return PopupMenuButton<PopUpMenuTypes>(
+        onSelected: (PopUpMenuTypes types) => onSelected(types),
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<PopUpMenuTypes>>[
+              const PopupMenuItem(
+                child: Text('Nearby Bus Stop'),
+                value: PopUpMenuTypes.nearestBus,
+              ),
+              const PopupMenuItem(
+                child: Text('About App'),
+                value: PopUpMenuTypes.about,
+              )
+            ]);
   }
 
   Future<bool?> _showAlertDialog() async {
@@ -252,6 +333,11 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                     },
                   ),
                   hintText: "5 digit bus stop code e.g. 65209",
+                  label: Text(
+                    _busStopDescription,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                   icon: Icon(Icons.hail))),
         ),
         Container(
@@ -301,10 +387,13 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                     _showOnBusTextFieldAndSearch(code);
                   }
                 }),
+            _getPopupMenuButton(context),
           ],
         ),
         floatingActionButton: _speechEnabled
             ? FloatingActionButton(
+                backgroundColor:
+                    _isSpeechListening ? Colors.green.withAlpha(145) : null,
                 child: Icon(_isSpeechListening ? Icons.mic : Icons.mic_off),
                 onPressed: () async {
                   //stop any speech annoucements so as not to
@@ -317,72 +406,83 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                   _isSpeechListening ? _stopListening() : _startListening();
                 })
             : null,
-        body: BlocListener<ArrivalsQueryBloc, ArrivalsQueryState>(
-          listener: (context, state) {
-            if (state is ArrivalsQueryStateSuccess) {
-              var services = state.services;
-              var preparedSpeech = _createSpeechFromServices(services);
-
-              context
-                  .read<SpeechReadingBloc>()
-                  .add(SpeechStartLoadingReadingEvent(preparedSpeech));
+        body: BlocListener<StopsHiveBloc, StopsHiveState>(
+          listener: (ctx, state) {
+            if (state is StopsHiveNotLoadedState) {
+              _isBusStopDBLoaded = false;
+            } else if (state is StopsHiveLoadedState) {
+              _isBusStopDBLoaded = true;
             }
           },
-          child: Center(
-              child: Container(
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    colorFilter: ColorFilter.mode(
-                        Colors.lightGreenAccent.withOpacity(0.2),
-                        BlendMode.dstATop),
-                    image: AssetImage('assets/images/lovebus.png'),
-                    fit: BoxFit.cover)),
-            child:
-                Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-              _getCompoundBusCodeTextField(context),
-              BlocBuilder<BookMarkCubit, List<BookMark>>(
+          child: BlocListener<ArrivalsQueryBloc, ArrivalsQueryState>(
+            listener: (context, state) {
+              if (state is ArrivalsQueryStateSuccess) {
+                var services = state.services;
+                var preparedSpeech = _createSpeechFromServices(services);
+
+                context
+                    .read<SpeechReadingBloc>()
+                    .add(SpeechStartLoadingReadingEvent(preparedSpeech));
+              }
+            },
+            child: Center(
+                child: Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      colorFilter: ColorFilter.mode(
+                          Colors.lightGreenAccent.withOpacity(0.2),
+                          BlendMode.dstATop),
+                      image: AssetImage('assets/images/lovebus.png'),
+                      fit: BoxFit.cover)),
+              child:
+                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+                _getCompoundBusCodeTextField(context),
+                BlocBuilder<BookMarkCubit, List<BookMark>>(
+                    builder: (context, state) {
+                  if (state.length == 0) return SizedBox.shrink();
+                  return BookMarkPageView(
+                    width: MediaQuery.of(context).size.width,
+                    height: 60.0,
+                    bookmarkCodeList: List<String>.generate(
+                        state.length, (index) => state[index].busStopCode),
+                    onBookMarkPressedCallback: _onBookMarkPressed,
+                    onBookMarkLongPressedCallback: _onBooKMarkLongPressed,
+                  );
+                }),
+                BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
                   builder: (context, state) {
-                if (state.length == 0) return SizedBox.shrink();
-                return BookMarkPageView(
-                  width: MediaQuery.of(context).size.width,
-                  height: 60.0,
-                  bookmarkCodeList: List<String>.generate(
-                      state.length, (index) => state[index].busStopCode),
-                  onBookMarkPressedCallback: _onBookMarkPressed,
-                  onBookMarkLongPressedCallback: _onBooKMarkLongPressed,
-                );
-              }),
-              BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
-                builder: (context, state) {
-                  Widget resultWidget;
-                  switch (state.runtimeType) {
-                    case ArrivalsQueryStateLoading:
-                      resultWidget = Center(child: CircularProgressIndicator());
-                      break;
+                    Widget resultWidget;
+                    switch (state.runtimeType) {
+                      case ArrivalsQueryStateLoading:
+                        resultWidget =
+                            Center(child: CircularProgressIndicator());
+                        break;
 
-                    case ArrivalsQueryStateError:
-                      var errorText = (state as ArrivalsQueryStateError).error;
-                      resultWidget = Center(
-                          child: Text("Error Getting Arrivals: $errorText"));
-                      break;
+                      case ArrivalsQueryStateError:
+                        var errorText =
+                            (state as ArrivalsQueryStateError).error;
+                        resultWidget = Center(
+                            child: Text("Error Getting Arrivals: $errorText"));
+                        break;
 
-                    case ArrivalsQueryStateSuccess:
-                      var services =
-                          (state as ArrivalsQueryStateSuccess).services;
+                      case ArrivalsQueryStateSuccess:
+                        var services =
+                            (state as ArrivalsQueryStateSuccess).services;
 
-                      resultWidget = getListViewBasedOnServices(services);
-                      break;
-                    case ArrivalsQueryStateEmpty:
-                    default:
-                      resultWidget = Center(child: Text("No results"));
-                      break;
-                  }
+                        resultWidget = getListViewBasedOnServices(services);
+                        break;
+                      case ArrivalsQueryStateEmpty:
+                      default:
+                        resultWidget = Center(child: Text("No results"));
+                        break;
+                    }
 
-                  return resultWidget;
-                },
-              ),
-            ]),
-          )),
+                    return resultWidget;
+                  },
+                ),
+              ]),
+            )),
+          ),
         ),
       ),
     );
@@ -390,6 +490,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
 
   @override
   void dispose() {
+    _textEditingController.dispose();
     context.read<SpeechReadingBloc>().add(SpeechStopReadingEvent());
     super.dispose();
   }
