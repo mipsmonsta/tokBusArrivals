@@ -81,6 +81,10 @@ flutter:
     - assets/images/ic_launcher.png
     - assets/files/bus_stop.json
     - assets/files/bus_stop_meta.json
+    - assets/images/feature_find.png
+    - assets/images/feature_hear.png
+    - assets/images/feature_scan.png
+    - assets/images/feature_speak.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

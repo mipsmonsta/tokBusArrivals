@@ -3,12 +3,16 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 class UtilityDialog {
   static void showLoaderDialog(BuildContext context,
-      [String message = "Loading..."]) {
+      [String message = "Finding Nearby Bus Stop"]) {
     AlertDialog alert = AlertDialog(
       content: new Row(
         children: [
-          CircularProgressIndicator(),
-          Container(margin: EdgeInsets.only(left: 7), child: Text(message)),
+          SizedBox(
+              child: CircularProgressIndicator(), width: 50.0, height: 50.0),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.0),
+          ),
+          Expanded(child: Text(message)),
         ],
       ),
     );

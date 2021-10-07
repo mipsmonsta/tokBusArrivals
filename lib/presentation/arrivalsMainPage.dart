@@ -27,7 +27,7 @@ import 'package:tokbusarrival/widget/utilityDialog.dart';
 import '../utility/string_extensions.dart';
 
 // add new types for more pop up menu items
-enum PopUpMenuTypes { nearestBus, about }
+enum PopUpMenuTypes { nearestBus, about, tutorial }
 
 class ArrivalsMainPage extends StatefulWidget {
   ArrivalsMainPage({Key? key}) : super(key: key);
@@ -207,6 +207,9 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
         case PopUpMenuTypes.about:
           UtilityDialog.showCustomAboutDialog(context);
           break;
+        case PopUpMenuTypes.tutorial:
+          Navigator.of(context).pushNamed('/tutorial');
+          break;
       }
     }
 
@@ -218,9 +221,13 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                 value: PopUpMenuTypes.nearestBus,
               ),
               const PopupMenuItem(
+                child: Text('Tutorial'),
+                value: PopUpMenuTypes.tutorial,
+              ),
+              const PopupMenuItem(
                 child: Text('About App'),
                 value: PopUpMenuTypes.about,
-              )
+              ),
             ]);
   }
 
