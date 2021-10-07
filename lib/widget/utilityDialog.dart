@@ -29,16 +29,16 @@ class UtilityDialog {
   static void showCustomAboutDialog(BuildContext context) async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
-    String appName = packageInfo.appName;
+    String appName = "SG SayMyBus";
     String version = packageInfo.version;
     String buildNumber = packageInfo.buildNumber;
 
     showAboutDialog(
         context: context,
+        applicationName: appName,
         applicationIcon:
             Image.asset('assets/images/ic_launcher.png', width: 60, height: 60),
-        applicationName: appName,
-        applicationVersion: "$version build: $buildNumber",
+        applicationVersion: "Version: $version build: $buildNumber",
         children: [Center(child: Text("© 2021 Thomas Tham "))]);
   }
 }

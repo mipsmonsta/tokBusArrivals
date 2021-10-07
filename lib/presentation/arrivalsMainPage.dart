@@ -27,7 +27,7 @@ import 'package:tokbusarrival/widget/utilityDialog.dart';
 import '../utility/string_extensions.dart';
 
 // add new types for more pop up menu items
-enum PopUpMenuTypes { nearestBus, about, tutorial }
+enum PopUpMenuTypes { nearestBus, about, tutorial, settings }
 
 class ArrivalsMainPage extends StatefulWidget {
   ArrivalsMainPage({Key? key}) : super(key: key);
@@ -200,6 +200,9 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
 
   Widget _getPopupMenuButton(BuildContext context) {
     void onSelected(PopUpMenuTypes typeSelected) {
+      context
+          .read<SpeechReadingBloc>()
+          .add(SpeechStopReadingEvent()); //stop speech
       switch (typeSelected) {
         case PopUpMenuTypes.nearestBus:
           _getNearestBusStopCode(context);
@@ -209,6 +212,9 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
           break;
         case PopUpMenuTypes.tutorial:
           Navigator.of(context).pushNamed('/tutorial');
+          break;
+        case PopUpMenuTypes.settings:
+          Navigator.of(context).pushNamed('/settings');
           break;
       }
     }
@@ -223,6 +229,10 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
               const PopupMenuItem(
                 child: Text('Tutorial'),
                 value: PopUpMenuTypes.tutorial,
+              ),
+              const PopupMenuItem(
+                child: Text('Settings'),
+                value: PopUpMenuTypes.settings,
               ),
               const PopupMenuItem(
                 child: Text('About App'),
@@ -377,14 +387,6 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
           title: Text("Bus Arrivals @ Stop"),
           actions: [
             IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  context
-                      .read<SpeechReadingBloc>()
-                      .add(SpeechStopReadingEvent());
-                  Navigator.of(context).pushNamed("/settings");
-                }),
-            IconButton(
                 icon: const Icon(Icons.camera),
                 onPressed: () async {
                   // String? code =
@@ -422,74 +424,68 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
             }
           },
           child: BlocListener<ArrivalsQueryBloc, ArrivalsQueryState>(
-            listener: (context, state) {
-              if (state is ArrivalsQueryStateSuccess) {
-                var services = state.services;
-                var preparedSpeech = _createSpeechFromServices(services);
+              listener: (context, state) {
+                if (state is ArrivalsQueryStateSuccess) {
+                  var services = state.services;
+                  var preparedSpeech = _createSpeechFromServices(services);
 
-                context
-                    .read<SpeechReadingBloc>()
-                    .add(SpeechStartLoadingReadingEvent(preparedSpeech));
-              }
-            },
-            child: Center(
-                child: Container(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      colorFilter: ColorFilter.mode(
-                          Colors.lightGreenAccent.withOpacity(0.2),
-                          BlendMode.dstATop),
-                      image: AssetImage('assets/images/lovebus.png'),
-                      fit: BoxFit.cover)),
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-                _getCompoundBusCodeTextField(context),
-                BlocBuilder<BookMarkCubit, List<BookMark>>(
-                    builder: (context, state) {
-                  if (state.length == 0) return SizedBox.shrink();
-                  return BookMarkPageView(
-                    width: MediaQuery.of(context).size.width,
-                    height: 60.0,
-                    bookmarkCodeList: List<String>.generate(
-                        state.length, (index) => state[index].busStopCode),
-                    onBookMarkPressedCallback: _onBookMarkPressed,
-                    onBookMarkLongPressedCallback: _onBooKMarkLongPressed,
-                  );
-                }),
-                BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
-                  builder: (context, state) {
-                    Widget resultWidget;
-                    switch (state.runtimeType) {
-                      case ArrivalsQueryStateLoading:
-                        resultWidget =
-                            Center(child: CircularProgressIndicator());
-                        break;
+                  context
+                      .read<SpeechReadingBloc>()
+                      .add(SpeechStartLoadingReadingEvent(preparedSpeech));
+                }
+              },
+              child: Center(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      _getCompoundBusCodeTextField(context),
+                      BlocBuilder<BookMarkCubit, List<BookMark>>(
+                          builder: (context, state) {
+                        if (state.length == 0) return SizedBox.shrink();
+                        return BookMarkPageView(
+                          width: MediaQuery.of(context).size.width,
+                          height: 60.0,
+                          bookmarkCodeList: List<String>.generate(state.length,
+                              (index) => state[index].busStopCode),
+                          onBookMarkPressedCallback: _onBookMarkPressed,
+                          onBookMarkLongPressedCallback: _onBooKMarkLongPressed,
+                        );
+                      }),
+                      BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
+                        builder: (context, state) {
+                          Widget resultWidget;
+                          switch (state.runtimeType) {
+                            case ArrivalsQueryStateLoading:
+                              resultWidget =
+                                  Center(child: CircularProgressIndicator());
+                              break;
 
-                      case ArrivalsQueryStateError:
-                        var errorText =
-                            (state as ArrivalsQueryStateError).error;
-                        resultWidget = Center(
-                            child: Text("Error Getting Arrivals: $errorText"));
-                        break;
+                            case ArrivalsQueryStateError:
+                              var errorText =
+                                  (state as ArrivalsQueryStateError).error;
+                              resultWidget = Center(
+                                  child: Text(
+                                      "Error Getting Arrivals: $errorText"));
+                              break;
 
-                      case ArrivalsQueryStateSuccess:
-                        var services =
-                            (state as ArrivalsQueryStateSuccess).services;
+                            case ArrivalsQueryStateSuccess:
+                              var services =
+                                  (state as ArrivalsQueryStateSuccess).services;
 
-                        resultWidget = getListViewBasedOnServices(services);
-                        break;
-                      case ArrivalsQueryStateEmpty:
-                      default:
-                        resultWidget = Center(child: Text("No results"));
-                        break;
-                    }
+                              resultWidget =
+                                  getListViewBasedOnServices(services);
+                              break;
+                            case ArrivalsQueryStateEmpty:
+                            default:
+                              resultWidget = Center(child: Text("No results"));
+                              break;
+                          }
 
-                    return resultWidget;
-                  },
-                ),
-              ]),
-            )),
-          ),
+                          return resultWidget;
+                        },
+                      ),
+                    ]),
+              )),
         ),
       ),
     );
