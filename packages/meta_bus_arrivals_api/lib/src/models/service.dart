@@ -47,21 +47,21 @@ class Service {
       if (json.containsKey("NextBus") &&
           json["NextBus"].containsKey("EstimatedArrival"))
         this.bus1 = NextBus.fromJson(json["NextBus"]);
-    } on FormatException catch (e) {
+    } on FormatException catch (_) {
       //print(e);
     }
     try {
       if (json.containsKey("NextBus2") &&
           json["NextBus2"].containsKey("EstimatedArrival"))
         this.bus2 = NextBus.fromJson(json["NextBus2"]);
-    } on FormatException catch (e) {
+    } on FormatException catch (_) {
       //print(e);
     }
     try {
       if (json.containsKey("NextBus3") &&
           json["NextBus3"].containsKey("EstimatedArrival"))
         this.bus3 = NextBus.fromJson(json["NextBus3"]);
-    } on FormatException catch (e) {
+    } on FormatException catch (_) {
       //print(e);
     }
   }

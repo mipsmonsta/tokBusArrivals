@@ -16,7 +16,6 @@ class BookMark extends Equatable {
   }
 
   @override
-  // TODO: implement props
   List<Object?> get props => [busStopCode, desc];
 }
 

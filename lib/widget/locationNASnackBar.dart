@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationNASnackBar extends SnackBar {
-  String textContent;
+  final String textContent;
   LocationNASnackBar([this.textContent = "Location service permission denied"])
       : super(
             content: Text(textContent),

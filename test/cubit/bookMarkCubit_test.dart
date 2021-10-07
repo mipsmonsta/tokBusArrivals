@@ -45,9 +45,9 @@ void main() {
     blocTest(
       'emits correctly when 2x oneBookMarks are added',
       build: () => BookMarkCubit(),
-      act: (cubit) {
-        (cubit as BookMarkCubit).addBookMark(oneBookMark);
-        (cubit as BookMarkCubit).addBookMark(oneBookMark);
+      act: (BookMarkCubit cubit) {
+        cubit.addBookMark(oneBookMark);
+        cubit.addBookMark(oneBookMark);
       },
       expect: () => [
         [oneBookMark],
@@ -58,11 +58,11 @@ void main() {
     blocTest(
       'emits correctly when oneBookMark is removed using removeLastBookMark',
       build: () => BookMarkCubit(),
-      act: (cubit) {
-        (cubit as BookMarkCubit).addBookMark(oneBookMark);
-        (cubit as BookMarkCubit).addBookMark(oneBookMark);
-        (cubit as BookMarkCubit).addBookMark(oneBookMark);
-        (cubit as BookMarkCubit).removeLastBookMark();
+      act: (BookMarkCubit cubit) {
+        cubit.addBookMark(oneBookMark);
+        cubit.addBookMark(oneBookMark);
+        cubit.addBookMark(oneBookMark);
+        cubit.removeLastBookMark();
       },
       expect: () => [
         [oneBookMark],
@@ -75,10 +75,10 @@ void main() {
     blocTest(
       'emits correctly when oneBookMark is removed using index',
       build: () => BookMarkCubit(),
-      act: (cubit) {
-        (cubit as BookMarkCubit).addBookMark(oneBookMark);
-        (cubit as BookMarkCubit).addBookMark(secondBookMark);
-        (cubit as BookMarkCubit).removeBookMark(0);
+      act: (BookMarkCubit cubit) {
+        cubit.addBookMark(oneBookMark);
+        cubit.addBookMark(secondBookMark);
+        cubit.removeBookMark(0);
       },
       expect: () => [
         [oneBookMark],
@@ -93,10 +93,10 @@ void main() {
     blocTest(
       'emits correctly when secondBookMark is removed using index',
       build: () => BookMarkCubit(),
-      act: (cubit) {
-        (cubit as BookMarkCubit).addBookMark(oneBookMark);
-        (cubit as BookMarkCubit).addBookMark(secondBookMark);
-        (cubit as BookMarkCubit).removeBookMark(1);
+      act: (BookMarkCubit cubit) {
+        cubit.addBookMark(oneBookMark);
+        cubit.addBookMark(secondBookMark);
+        cubit.removeBookMark(1);
       },
       expect: () => [
         [oneBookMark],
