@@ -536,8 +536,16 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                               break;
                             case ArrivalsQueryStateEmpty:
                             default:
-                              resultWidget = Center(
-                                  child: Expanded(child: Text("No results")));
+                              resultWidget = Expanded(
+                                child: Opacity(
+                                  opacity: 0.6,
+                                  child: Image.asset(
+                                    'assets/images/nothing_to_see.png',
+                                    colorBlendMode: BlendMode.colorBurn,
+                                  ),
+                                ),
+                              );
+
                               break;
                           }
 

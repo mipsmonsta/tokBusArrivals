@@ -85,6 +85,7 @@ flutter:
     - assets/images/feature_hear.png
     - assets/images/feature_scan.png
     - assets/images/feature_speak.png
+    - assets/images/nothing_to_see.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
