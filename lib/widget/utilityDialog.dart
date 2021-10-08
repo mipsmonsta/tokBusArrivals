@@ -35,10 +35,16 @@ class UtilityDialog {
 
     showAboutDialog(
         context: context,
-        applicationName: appName,
-        applicationIcon:
-            Image.asset('assets/images/ic_launcher.png', width: 60, height: 60),
-        applicationVersion: "Version: $version build: $buildNumber",
-        children: [Center(child: Text("© 2021 Thomas Tham "))]);
+        applicationName:
+            "", //Workaround for bug where the pakcage name is shown
+        children: [
+          Center(
+              child: Image.asset('assets/images/ic_launcher.png',
+                  width: 80, height: 80)),
+          Center(child: Text("")),
+          Center(child: Text("$appName")),
+          Center(child: Text("Version: $version build: $buildNumber")),
+          Center(child: Text("© 2021 Thomas Tham "))
+        ]);
   }
 }

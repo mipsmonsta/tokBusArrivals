@@ -191,8 +191,16 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
         }
       }
     } catch (e) {
-      print(e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(LocationNASnackBar());
+      switch (e) {
+        case LocationPermissionErrors.permission_finally_obtained:
+          // no-op
+          break;
+
+        default:
+          //location service not available/denied/permanent denied
+          ScaffoldMessenger.of(context).showSnackBar(LocationNASnackBar());
+          break;
+      }
     } finally {
       Navigator.of(context).pop(); // remove Loader Dialog
     }
@@ -334,38 +342,62 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
   }
 
   Widget _getCompoundBusCodeTextField(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: TextField(
-              controller: _textEditingController,
-              onSubmitted: _onCodeSubmitted,
-              keyboardType: TextInputType.number,
-              maxLength: 5,
-              decoration: InputDecoration(
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: () {
-                      _onCodeSubmitted(_textEditingController.value.text);
-                    },
-                  ),
-                  hintText: "5 digit bus stop code e.g. 65209",
-                  label: Text(
-                    _busStopDescription,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  icon: Icon(Icons.hail))),
+        const SizedBox(
+          height: 8.0,
         ),
         Container(
-            alignment: Alignment.topCenter,
-            child: IconButton(
-              icon: Icon(Icons.bookmark, color: Colors.grey),
+          margin: EdgeInsets.only(left: 16.0),
+          alignment: Alignment.centerLeft,
+          child: Text(
+            _busStopDescription,
+            textAlign: TextAlign.left,
+          ),
+        ),
+        Row(
+          children: [
+            const SizedBox(width: 8.0),
+            Expanded(
+                child: TextField(
+                    controller: _textEditingController,
+                    onSubmitted: _onCodeSubmitted,
+                    keyboardType: TextInputType.number,
+                    maxLength: 5,
+                    decoration: InputDecoration(
+                      counterText: "", //don't show e.g. 0/5
+                      filled: true,
+                      fillColor: Colors.lightGreen[50],
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(30)),
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.search),
+                        onPressed: () {
+                          _onCodeSubmitted(_textEditingController.value.text);
+                        },
+                      ),
+                      hintText: "5 digit bus stop code e.g. 65209",
+                      // label: Text(
+                      //   _busStopDescription,
+                      //   overflow: TextOverflow.ellipsis,
+                      // ),
+                    ))),
+            IconButton(
+              padding: EdgeInsets.zero,
+              iconSize: 30.0,
+              icon: Icon(Icons.bookmark, color: Colors.red),
               onPressed: () {
-                context.read<BookMarkCubit>().addBookMark(
-                    BookMark(_textEditingController.value.text, ""));
+                if (!_textEditingController.value.text.isEmpty)
+                  context.read<BookMarkCubit>().addBookMark(
+                      BookMark(_textEditingController.value.text, ""));
               },
-            ))
+            )
+          ],
+        ),
+        const SizedBox(
+          height: 8.0,
+        ),
       ],
     );
   }
@@ -381,6 +413,9 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
 
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.lightGreen[50],
+        resizeToAvoidBottomInset:
+            false, //avoid scaffold content resize and overflow at bottom when keyboard is out
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title
@@ -438,19 +473,43 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      _getCompoundBusCodeTextField(context),
+                      Card(
+                        margin: EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _getCompoundBusCodeTextField(context),
+                            const SizedBox(height: 8.0),
+                          ],
+                        ),
+                      ),
                       BlocBuilder<BookMarkCubit, List<BookMark>>(
                           builder: (context, state) {
                         if (state.length == 0) return SizedBox.shrink();
-                        return BookMarkPageView(
-                          width: MediaQuery.of(context).size.width,
-                          height: 60.0,
-                          bookmarkCodeList: List<String>.generate(state.length,
-                              (index) => state[index].busStopCode),
-                          onBookMarkPressedCallback: _onBookMarkPressed,
-                          onBookMarkLongPressedCallback: _onBooKMarkLongPressed,
+                        return Card(
+                          color: Colors.amber[200],
+                          margin: EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              const SizedBox(
+                                height: 8.0,
+                              ),
+                              Center(child: Text("Bookmarks")),
+                              BookMarkPageView(
+                                width: MediaQuery.of(context).size.width,
+                                height: 60.0,
+                                bookmarkCodeList: List<String>.generate(
+                                    state.length,
+                                    (index) => state[index].busStopCode),
+                                onBookMarkPressedCallback: _onBookMarkPressed,
+                                onBookMarkLongPressedCallback:
+                                    _onBooKMarkLongPressed,
+                              ),
+                            ],
+                          ),
                         );
                       }),
+                      const SizedBox(height: 8.0),
                       BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
                         builder: (context, state) {
                           Widget resultWidget;
@@ -477,7 +536,8 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                               break;
                             case ArrivalsQueryStateEmpty:
                             default:
-                              resultWidget = Center(child: Text("No results"));
+                              resultWidget = Center(
+                                  child: Expanded(child: Text("No results")));
                               break;
                           }
 
