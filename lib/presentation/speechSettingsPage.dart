@@ -63,6 +63,7 @@ class _SpeechSettingsPageState extends State<SpeechSettingsPage> {
             child: BlocConsumer<SpeechMuteCubit, bool>(
               builder: (ctx, state) {
                 return SwitchListTile(
+                    activeColor: Colors.amber,
                     title: Text("Mute Speech"),
                     value: state,
                     onChanged: (value) {

@@ -1,4 +1,5 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/material.dart';
 
 enum LocationPermissionErrors {
   denied,
@@ -36,5 +37,11 @@ class Utility {
     }
     // we have permission at first try, so let's get the position
     return await Geolocator.getCurrentPosition();
+  }
+
+  static ThemeData getAppThemeData() {
+    return ThemeData(
+        scaffoldBackgroundColor: Colors.lightBlue[100],
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.amber));
   }
 }

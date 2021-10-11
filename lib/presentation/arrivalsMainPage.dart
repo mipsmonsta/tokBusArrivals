@@ -16,10 +16,12 @@ import 'package:tokbusarrival/bloc/stopsHiveBloc.dart';
 import 'package:tokbusarrival/bloc/stopsHiveEvent.dart';
 import 'package:tokbusarrival/bloc/stopsHiveState.dart';
 import 'package:tokbusarrival/cubit/bookMarkCubit.dart';
+import 'package:tokbusarrival/utility/constants.dart';
 import 'package:tokbusarrival/utility/utility.dart';
 import 'package:tokbusarrival/widget/SayDigitsSnackBar.dart';
 import 'package:tokbusarrival/widget/bookMarkPageView.dart';
 import 'package:tokbusarrival/widget/cannotGetNearbyBusStopSnackBar%20copy.dart';
+import 'package:tokbusarrival/widget/floatingHotAirAnimatedImage.dart';
 import 'package:tokbusarrival/widget/locationNASnackBar.dart';
 import 'package:tokbusarrival/widget/minuteTag.dart';
 import 'package:tokbusarrival/widget/operatorBusTypeColorIcon.dart';
@@ -44,22 +46,33 @@ class ArrivalsMainPage extends StatefulWidget {
   _ArrivalsMainPageState createState() => _ArrivalsMainPageState();
 }
 
-class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
+class _ArrivalsMainPageState extends State<ArrivalsMainPage>
+    with WidgetsBindingObserver {
   SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   bool _isSpeechListening = false;
   bool _isBusStopDBLoaded = false;
-  String _busStopDescription = "";
+  String _busStopDescription = HINTBUSTEXTFIELD;
 
   TextEditingController _textEditingController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance?.addObserver(this);
     initializeDateFormatting('en_SG', null);
     _enableSpeech();
     //Prepare Bus Stop Hive
     context.read<StopsHiveBloc>().add(StopsHiveCheckLoadedEvent());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.paused) {
+      context.read<SpeechReadingBloc>().getTts.stop();
+    }
   }
 
   void _enableSpeech() async {
@@ -118,9 +131,9 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
       if (busStopDesc != null) {
         _busStopDescription = "$busStopDesc along $busStopRoadName";
       } else
-        _busStopDescription = "";
+        _busStopDescription = HINTBUSTEXTFIELD;
     } else
-      _busStopDescription = "";
+      _busStopDescription = HINTBUSTEXTFIELD;
 
     setState(() {}); //for _busStopDescription
   }
@@ -355,6 +368,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
             textAlign: TextAlign.left,
           ),
         ),
+        const SizedBox(height: 8.0),
         Row(
           children: [
             const SizedBox(width: 8.0),
@@ -367,7 +381,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                     decoration: InputDecoration(
                       counterText: "", //don't show e.g. 0/5
                       filled: true,
-                      fillColor: Colors.lightGreen[50],
+                      fillColor: Colors.lightBlue[100],
                       border: OutlineInputBorder(
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.circular(30)),
@@ -377,7 +391,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                           _onCodeSubmitted(_textEditingController.value.text);
                         },
                       ),
-                      hintText: "5 digit bus stop code e.g. 65209",
+                      // hintText: "5 digit bus stop code e.g. 65209",
                       // label: Text(
                       //   _busStopDescription,
                       //   overflow: TextOverflow.ellipsis,
@@ -413,7 +427,6 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
 
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.lightGreen[50],
         resizeToAvoidBottomInset:
             false, //avoid scaffold content resize and overflow at bottom when keyboard is out
         appBar: AppBar(
@@ -436,8 +449,9 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
         ),
         floatingActionButton: _speechEnabled
             ? FloatingActionButton(
-                backgroundColor:
-                    _isSpeechListening ? Colors.green.withAlpha(145) : null,
+                backgroundColor: _isSpeechListening
+                    ? Colors.amber
+                    : Colors.amber.withAlpha(150),
                 child: Icon(_isSpeechListening ? Icons.mic : Icons.mic_off),
                 onPressed: () async {
                   //stop any speech annoucements so as not to
@@ -539,10 +553,15 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
                               resultWidget = Expanded(
                                 child: Opacity(
                                   opacity: 0.6,
-                                  child: Image.asset(
-                                    'assets/images/nothing_to_see.png',
-                                    colorBlendMode: BlendMode.colorBurn,
-                                  ),
+                                  child: Stack(children: [
+                                    FloatingHotAirAnimatedImage(),
+                                    Positioned(
+                                        top: 8.0,
+                                        left: 8.0,
+                                        child: Text("Empty like the wind...",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)))
+                                  ]),
                                 ),
                               );
 
@@ -563,6 +582,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage> {
   void dispose() {
     _textEditingController.dispose();
     context.read<SpeechReadingBloc>().add(SpeechStopReadingEvent());
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 }

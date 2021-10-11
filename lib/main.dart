@@ -16,6 +16,7 @@ import 'package:tokbusarrival/hive/StopsAdapter.dart';
 import 'package:tokbusarrival/presentation/arrivalsMainPage.dart';
 import 'package:tokbusarrival/presentation/speechSettingsPage.dart';
 import 'package:tokbusarrival/presentation/tutorialPage.dart';
+import 'package:tokbusarrival/utility/utility.dart';
 
 import 'presentation/cameraPage.dart';
 import 'package:path/path.dart' as ppath;
@@ -80,17 +81,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Tok Bus Arrival',
-        theme: ThemeData(
-            // This is the theme of your application.
-            //
-            // Try running your application with "flutter run". You'll see the
-            // application has a blue toolbar. Then, without quitting the app, try
-            // changing the primarySwatch below to Colors.green and then invoke
-            // "hot reload" (press "r" in the console where you ran "flutter run",
-            // or simply save your changes to "hot reload" in a Flutter IDE).
-            // Notice that the counter didn't reset back to zero; the application
-            // is not restarted.
-            primarySwatch: Colors.lightGreen),
+        theme: Utility.getAppThemeData(),
         routes: {
           '/': (_) => MultiBlocProvider(
                 providers: [
