@@ -13,6 +13,7 @@ class BusArrivalTimerBusyState extends BusArrivalTimerState {
   final String busService;
   final String svcOperator;
   final double arrivalRatio;
+  bool isHydrated = false;
 
   BusArrivalTimerBusyState(
       {required this.eta,
@@ -21,7 +22,8 @@ class BusArrivalTimerBusyState extends BusArrivalTimerState {
       required this.arrivalRatio});
 
   @override
-  List<Object?> get props => [eta, busService, svcOperator, arrivalRatio];
+  List<Object?> get props =>
+      [eta, busService, svcOperator, arrivalRatio, isHydrated];
 }
 
 class BusArrivalTimerDoneState extends BusArrivalTimerState {

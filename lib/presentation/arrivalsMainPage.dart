@@ -1,5 +1,6 @@
 import 'package:bus_stops/bus_stops.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -304,6 +305,10 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
         eta: eta, busNumber: busNumber, svcOperator: svcOperator));
   }
 
+  void _onTimerPressedClose() {
+    context.read<BusArrivalTimerBloc>().add(BusArrivalTimerStopEvent());
+  }
+
   Widget getListViewBasedOnServices(List<Service> services) {
     return Expanded(
         child: RefreshIndicator(
@@ -437,7 +442,10 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown
+    ]); // limit to portrait
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset:
@@ -553,6 +561,13 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                           busNumber = state.busService;
                           svcOperator = state.svcOperator;
                           completion = state.arrivalRatio;
+                          if (state.isHydrated) {
+                            context.read<BusArrivalTimerBloc>().add(
+                                BusArrivalTimerStartEvent(
+                                    eta: state.eta,
+                                    busNumber: state.busService,
+                                    svcOperator: state.svcOperator));
+                          }
                         }
 
                         return Card(
@@ -560,11 +575,12 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                             margin: const EdgeInsets.all(8.0),
                             child: BusTimer(
                               width: MediaQuery.of(context).size.width,
-                              height: 80.0,
+                              height: 110.0,
                               busNumber: busNumber,
                               svcOperator: svcOperator,
                               eta: eta,
                               completion: completion,
+                              onPressedClosed: _onTimerPressedClose,
                             ));
                       }),
                       const SizedBox(height: 8.0),

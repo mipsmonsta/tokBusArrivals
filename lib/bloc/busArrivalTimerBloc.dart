@@ -1,13 +1,14 @@
-import 'package:bloc/bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:tokbusarrival/bloc/busArrivalTimerEvent.dart';
 import 'package:tokbusarrival/bloc/busArrivalTimerState.dart';
 
 class BusArrivalTimerBloc
-    extends Bloc<BusArrivalTimerEvent, BusArrivalTimerState> {
+    extends HydratedBloc<BusArrivalTimerEvent, BusArrivalTimerState> {
   bool _isCancelled = false;
   BusArrivalTimerBloc() : super(BusArrivalTimerIdleState()) {
     on<BusArrivalTimerStartEvent>((event, emit) async {
-      if (!(state is BusArrivalTimerIdleState)) return;
+      if (!(state is BusArrivalTimerIdleState ||
+          state is BusArrivalTimerBusyState)) return;
       _isCancelled = false;
       Duration initialDifference = event.eta.difference(DateTime.now());
       print("intialDifference: ${initialDifference.inSeconds}");
@@ -25,7 +26,7 @@ class BusArrivalTimerBloc
             arrivalRatio:
                 1.0 - difference.inSeconds / initialDifference.inSeconds));
 
-        await Future.delayed(Duration(seconds: 10));
+        await Future.delayed(Duration(seconds: 2));
         difference = event.eta.difference(DateTime.now());
         print("difference: ${difference.inSeconds}");
         if (difference.isNegative || _isCancelled) {
@@ -53,5 +54,34 @@ class BusArrivalTimerBloc
     on<BusArrivalTimerStopEvent>((_, emit) {
       _isCancelled = true;
     });
+  }
+
+  @override
+  BusArrivalTimerState? fromJson(Map<String, dynamic> json) {
+    DateTime eta = DateTime.fromMillisecondsSinceEpoch(json["eta"]);
+    String busService = json["busService"];
+    String svcOperator = json["busOperator"];
+    double arrivalRatio = json["arrivalRatio"];
+    //
+    BusArrivalTimerBusyState busyState = BusArrivalTimerBusyState(
+        eta: eta,
+        busService: busService,
+        svcOperator: svcOperator,
+        arrivalRatio: arrivalRatio);
+    busyState.isHydrated = true;
+    return busyState;
+  }
+
+  @override
+  Map<String, dynamic>? toJson(BusArrivalTimerState state) {
+    if (state is BusArrivalTimerBusyState) {
+      return {
+        "busService": state.busService,
+        "busOperator": state.svcOperator,
+        "eta": state.eta.millisecondsSinceEpoch,
+        "arrivalRatio": state.arrivalRatio,
+      };
+    }
+    return null;
   }
 }
