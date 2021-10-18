@@ -6,6 +6,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:meta_bus_arrivals_api/meta_bus_arrivals_api.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryBloc.dart';
+import 'package:tokbusarrival/bloc/busArrivalTimerBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/stopsHiveBloc.dart';
 import 'package:tokbusarrival/cubit/SpeechMuteCubit.dart';
@@ -91,6 +92,9 @@ class MyApp extends StatelessWidget {
                   BlocProvider(
                     create: (_) => StopsHiveBloc(),
                   ),
+                  BlocProvider(
+                    create: (_) => BusArrivalTimerBloc(),
+                  )
                 ],
                 child: ArrivalsMainPage(),
               ),

@@ -10,6 +10,9 @@ import 'package:tokbusarrival/bloc/arrivalsQueryBloc.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryEvent.dart';
 import 'package:tokbusarrival/bloc/arrivalsQueryState.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:tokbusarrival/bloc/busArrivalTimerBloc.dart';
+import 'package:tokbusarrival/bloc/busArrivalTimerEvent.dart';
+import 'package:tokbusarrival/bloc/busArrivalTimerState.dart';
 import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/bloc/speechReadingEvent.dart';
 import 'package:tokbusarrival/bloc/stopsHiveBloc.dart';
@@ -20,6 +23,7 @@ import 'package:tokbusarrival/utility/constants.dart';
 import 'package:tokbusarrival/utility/utility.dart';
 import 'package:tokbusarrival/widget/SayDigitsSnackBar.dart';
 import 'package:tokbusarrival/widget/bookMarkPageView.dart';
+import 'package:tokbusarrival/widget/busTimer.dart';
 import 'package:tokbusarrival/widget/cannotGetNearbyBusStopSnackBar%20copy.dart';
 import 'package:tokbusarrival/widget/floatingHotAirAnimatedImage.dart';
 import 'package:tokbusarrival/widget/locationNASnackBar.dart';
@@ -295,6 +299,11 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
     );
   }
 
+  void _onTapServiceTimer(DateTime eta, String busNumber, String svcOperator) {
+    context.read<BusArrivalTimerBloc>().add(BusArrivalTimerStartEvent(
+        eta: eta, busNumber: busNumber, svcOperator: svcOperator));
+  }
+
   Widget getListViewBasedOnServices(List<Service> services) {
     return Expanded(
         child: RefreshIndicator(
@@ -347,6 +356,10 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                         arrivalMin: arrivalMin,
                         capacity: service.bus1!.capacity,
                       ),
+                      onTap: () => _onTapServiceTimer(
+                          service.bus1!.estimatedArrival,
+                          service.number,
+                          service.busOperator),
                     ));
                   }
                 },
@@ -502,7 +515,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                         if (state.length == 0) return SizedBox.shrink();
                         return Card(
                           color: Colors.amber[200],
-                          margin: EdgeInsets.all(8.0),
+                          margin: const EdgeInsets.all(8.0),
                           child: Column(
                             children: [
                               const SizedBox(
@@ -522,6 +535,37 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                             ],
                           ),
                         );
+                      }),
+                      BlocBuilder<BusArrivalTimerBloc, BusArrivalTimerState>(
+                          builder: (context, state) {
+                        late DateTime eta;
+                        late String svcOperator;
+                        late String busNumber;
+                        double completion = 1.0;
+                        if (state is BusArrivalTimerIdleState)
+                          return SizedBox.shrink();
+                        else if (state is BusArrivalTimerDoneState) {
+                          eta = state.eta;
+                          busNumber = state.busService;
+                          svcOperator = state.svcOperator;
+                        } else if (state is BusArrivalTimerBusyState) {
+                          eta = state.eta;
+                          busNumber = state.busService;
+                          svcOperator = state.svcOperator;
+                          completion = state.arrivalRatio;
+                        }
+
+                        return Card(
+                            color: Colors.white,
+                            margin: const EdgeInsets.all(8.0),
+                            child: BusTimer(
+                              width: MediaQuery.of(context).size.width,
+                              height: 80.0,
+                              busNumber: busNumber,
+                              svcOperator: svcOperator,
+                              eta: eta,
+                              completion: completion,
+                            ));
                       }),
                       const SizedBox(height: 8.0),
                       BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(

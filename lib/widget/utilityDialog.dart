@@ -43,7 +43,7 @@ class UtilityDialog {
                   width: 80, height: 80)),
           Center(child: Text("")),
           Center(child: Text("$appName")),
-          Center(child: Text("Version: $version build: $buildNumber")),
+          Center(child: Text("Version: $version (build: $buildNumber)")),
           Center(child: Text("© 2021 Thomas Tham "))
         ]);
   }
