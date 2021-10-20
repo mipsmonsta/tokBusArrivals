@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'package:tokbusarrival/utility/utility.dart';
+
 class UtilityDialog {
   static void showLoaderDialog(BuildContext context,
       [String message = "Finding Nearby Bus Stop"]) {
@@ -31,6 +33,7 @@ class UtilityDialog {
 
     String appName = "SG SayMyBus";
     String version = packageInfo.version;
+
     String buildNumber = packageInfo.buildNumber;
 
     showAboutDialog(
@@ -46,5 +49,36 @@ class UtilityDialog {
           Center(child: Text("Version: $version (build: $buildNumber)")),
           Center(child: Text("© 2021 Thomas Tham "))
         ]);
+  }
+
+  static void showTutorialDialog(BuildContext context,
+      [String message = "Show Tutorial for first time use?"]) {
+    AlertDialog alert = AlertDialog(
+      title: const Text("First use"),
+      content: Text(message),
+      actions: [
+        TextButton(
+            child: Text("Yes"),
+            onPressed: () {
+              Utility.setNotFirstUse();
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/tutorial');
+            }),
+        TextButton(
+          child: Text("Next time"),
+          onPressed: () {
+            Navigator.pop(context); //dismissed dialog
+          },
+        )
+      ],
+    );
+
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }

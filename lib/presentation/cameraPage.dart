@@ -38,11 +38,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
       setState(() => _controllerInitialized = true);
     });
-
-    Future.delayed(Duration(seconds: 5)).then((_) {
-      //hide bus stop pole image after 5 seconds
-      setState(() {
-        _busPoleVisibility = false;
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      Future.delayed(Duration(seconds: 5)).then((_) {
+        //hide bus stop pole image after 5 seconds
+        setState(() {
+          _busPoleVisibility = false;
+        });
       });
     });
   }

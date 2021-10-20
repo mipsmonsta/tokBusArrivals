@@ -1,6 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum LocationPermissionErrors {
   denied,
@@ -79,5 +80,15 @@ class Utility {
     );
 
     return textTheme;
+  }
+
+  static Future<bool> isFirstUse() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('first_use') ?? true;
+  }
+
+  static void setNotFirstUse() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('first_use', false);
   }
 }

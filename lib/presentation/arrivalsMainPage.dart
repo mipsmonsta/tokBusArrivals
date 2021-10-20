@@ -70,6 +70,14 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
     _enableSpeech();
     //Prepare Bus Stop Hive
     context.read<StopsHiveBloc>().add(StopsHiveCheckLoadedEvent());
+
+    // check whether to show tutorial
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      bool isFirstUse = await Utility.isFirstUse();
+      if (isFirstUse) {
+        UtilityDialog.showTutorialDialog(context);
+      }
+    });
   }
 
   @override
@@ -620,7 +628,8 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                                 child: Opacity(
                                   opacity: 0.6,
                                   child: Stack(children: [
-                                    FloatingHotAirAnimatedImage(),
+                                    Center(
+                                        child: FloatingHotAirAnimatedImage()),
                                     Positioned(
                                         top: 8.0,
                                         left: 8.0,
