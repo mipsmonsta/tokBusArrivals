@@ -1,5 +1,7 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -13,6 +15,7 @@ import 'package:tokbusarrival/cubit/SpeechMuteCubit.dart';
 import 'package:tokbusarrival/cubit/SpeechPitchCubit.dart';
 import 'package:tokbusarrival/cubit/SpeechRateCubit.dart';
 import 'package:tokbusarrival/cubit/bookMarkCubit.dart';
+import 'package:tokbusarrival/cubit/vibrationCubit.dart';
 import 'package:tokbusarrival/hive/StopsAdapter.dart';
 import 'package:tokbusarrival/presentation/arrivalsMainPage.dart';
 import 'package:tokbusarrival/presentation/speechSettingsPage.dart';
@@ -38,6 +41,12 @@ void main() async {
   await Hive.initFlutter(storagePathBoxes);
   Hive.registerAdapter(StopAdapter());
   await Hive.openLazyBox("bus_stops");
+
+  // font license
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('assets/google_fonts/OFL.txt');
+    yield LicenseEntryWithLineBreaks(['google_fonts'], license);
+  });
 
   runApp(MyApp());
 }
@@ -78,11 +87,12 @@ class MyApp extends StatelessWidget {
                     .state, // put above MaterialAppLevel so that mute state read/write app-wide
                 context.read<SpeechPitchCubit>().state,
                 context.read<SpeechRateCubit>().state)),
+        BlocProvider<VibrationCubit>(create: (_) => VibrationCubit()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Tok Bus Arrival',
-        theme: Utility.getAppThemeData(),
+        theme: Utility.getAppThemeData(context),
         routes: {
           '/': (_) => MultiBlocProvider(
                 providers: [

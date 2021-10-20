@@ -20,6 +20,7 @@ import 'package:tokbusarrival/bloc/stopsHiveBloc.dart';
 import 'package:tokbusarrival/bloc/stopsHiveEvent.dart';
 import 'package:tokbusarrival/bloc/stopsHiveState.dart';
 import 'package:tokbusarrival/cubit/bookMarkCubit.dart';
+import 'package:tokbusarrival/cubit/vibrationCubit.dart';
 import 'package:tokbusarrival/utility/constants.dart';
 import 'package:tokbusarrival/utility/utility.dart';
 import 'package:tokbusarrival/widget/SayDigitsSnackBar.dart';
@@ -544,7 +545,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                           ),
                         );
                       }),
-                      BlocBuilder<BusArrivalTimerBloc, BusArrivalTimerState>(
+                      BlocConsumer<BusArrivalTimerBloc, BusArrivalTimerState>(
                           builder: (context, state) {
                         late DateTime eta;
                         late String svcOperator;
@@ -562,6 +563,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                           svcOperator = state.svcOperator;
                           completion = state.arrivalRatio;
                           if (state.isHydrated) {
+                            //call event to start timer
                             context.read<BusArrivalTimerBloc>().add(
                                 BusArrivalTimerStartEvent(
                                     eta: state.eta,
@@ -582,6 +584,10 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                               completion: completion,
                               onPressedClosed: _onTimerPressedClose,
                             ));
+                      }, listener: (context, state) {
+                        if (state is BusArrivalTimerDoneState) {
+                          context.read<VibrationCubit>().startVibration();
+                        }
                       }),
                       const SizedBox(height: 8.0),
                       BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(

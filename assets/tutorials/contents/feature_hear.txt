@@ -1,0 +1,3 @@
+Toggle the microphone floating buttons and say out loud the 5-digits bus stop code, and viola, the bus arrival times for the bus stops will be presented to you.
+
+Remember to enunciate clearly and don't rush.

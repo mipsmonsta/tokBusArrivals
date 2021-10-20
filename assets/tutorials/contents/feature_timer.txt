@@ -1,0 +1,5 @@
+Click on the service of interest to set in-app timer.
+
+With the timer, you can countdown to the bus arrivials - with vibration. 
+
+Go to settings to disable the vibration under "settings".

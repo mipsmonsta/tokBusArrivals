@@ -13,10 +13,11 @@ class BusArrivalTimerBusyState extends BusArrivalTimerState {
   final String busService;
   final String svcOperator;
   final double arrivalRatio;
-  bool isHydrated = false;
+  final bool isHydrated;
 
   BusArrivalTimerBusyState(
-      {required this.eta,
+      {this.isHydrated = false,
+      required this.eta,
       required this.busService,
       required this.svcOperator,
       required this.arrivalRatio});

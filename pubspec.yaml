@@ -48,6 +48,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   geolocator: ^7.6.2
   kdtree: ^0.2.0
+  google_fonts: ^2.1.0
+  vibration: ^1.7.4-nullsafety.0
 
 dev_dependencies:
   flutter_test:
@@ -81,13 +83,26 @@ flutter:
     - assets/images/ic_launcher.png
     - assets/files/bus_stop.json
     - assets/files/bus_stop_meta.json
-    - assets/images/feature_find.png
-    - assets/images/feature_hear.png
-    - assets/images/feature_scan.png
-    - assets/images/feature_speak.png
     - assets/images/nothing_to_see.png
     - assets/images/nothing_to_see_cloud.png
     - assets/images/bus_timer_indicator.png
+    - assets/google_fonts/
+    # tutorials related files
+    - assets/tutorials/images/feature_find.png
+    - assets/tutorials/images/feature_hear.png
+    - assets/tutorials/images/feature_scan.png
+    - assets/tutorials/images/feature_speak.png
+    - assets/tutorials/images/feature_timer.png
+    - assets/tutorials/captions/feature_find.txt
+    - assets/tutorials/captions/feature_hear.txt
+    - assets/tutorials/captions/feature_scan.txt
+    - assets/tutorials/captions/feature_speak.txt
+    - assets/tutorials/captions/feature_timer.txt
+    - assets/tutorials/contents/feature_find.txt
+    - assets/tutorials/contents/feature_hear.txt
+    - assets/tutorials/contents/feature_scan.txt
+    - assets/tutorials/contents/feature_speak.txt
+    - assets/tutorials/contents/feature_timer.txt
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

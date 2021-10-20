@@ -1,0 +1,3 @@
+Have the phone read out the next bus arrivial timings for the services at the bus stop of interest.
+
+Use the settings to mute/unmute or simply to change the speed and pitch of the reading.

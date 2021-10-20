@@ -4,6 +4,7 @@ import 'package:tokbusarrival/bloc/speechReadingBloc.dart';
 import 'package:tokbusarrival/cubit/SpeechMuteCubit.dart';
 import 'package:tokbusarrival/cubit/SpeechPitchCubit.dart';
 import 'package:tokbusarrival/cubit/SpeechRateCubit.dart';
+import 'package:tokbusarrival/cubit/vibrationCubit.dart';
 
 class SpeechSettingsPage extends StatefulWidget {
   const SpeechSettingsPage({Key? key}) : super(key: key);
@@ -16,7 +17,7 @@ class _SpeechSettingsPageState extends State<SpeechSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("Speech settings")),
+        appBar: AppBar(title: Text("Settings")),
         body: ListView(children: [
           LimitedBox(
             child: Center(child: Text('Adjust Speech Attributes')),
@@ -74,6 +75,21 @@ class _SpeechSettingsPageState extends State<SpeechSettingsPage> {
                 double volRate = state ? 0.0 : 1.0;
                 ctx.read<SpeechReadingBloc>().getTts.setVolume(volRate);
               },
+            ),
+          ),
+          LimitedBox(
+            maxHeight: 100,
+            child: BlocConsumer<VibrationCubit, bool>(
+              builder: (ctx, state) {
+                return SwitchListTile(
+                    activeColor: Colors.amber,
+                    title: Text("Allow Vibration"),
+                    value: state,
+                    onChanged: (value) {
+                      ctx.read<VibrationCubit>().toggleAllowVibration(value);
+                    });
+              },
+              listener: (ctx, state) {},
             ),
           )
         ]));

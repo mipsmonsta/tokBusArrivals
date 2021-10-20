@@ -26,7 +26,7 @@ class BusTimer extends StatelessWidget {
     String arrivalETAMsg = "ETA ${arrivalInMin.inMinutes} min";
     if (arrivalInMin.inMinutes == 0) arrivalETAMsg = "ETA < 1 min";
     return Container(
-        color: (completion == 1.0) ? Colors.red[200] : null,
+        color: (completion == 1.0) ? Colors.yellow[200] : null,
         width: width,
         height: height,
         child: Stack(alignment: Alignment.center, children: [
@@ -44,11 +44,13 @@ class BusTimer extends StatelessWidget {
                         style: TextStyle(fontStyle: FontStyle.italic),
                       ))
           ]),
-          Positioned(
-              right: 0.0,
-              top: 0.0,
-              child: IconButton(
-                  icon: Icon(Icons.close), onPressed: () => onPressedClosed()))
+          if (completion < 1.0) // only show X button when timer not completed
+            Positioned(
+                right: 0.0,
+                top: 0.0,
+                child: IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () => onPressedClosed()))
         ]));
   }
 

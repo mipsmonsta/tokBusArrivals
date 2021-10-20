@@ -11,7 +11,7 @@ class BusArrivalTimerBloc
           state is BusArrivalTimerBusyState)) return;
       _isCancelled = false;
       Duration initialDifference = event.eta.difference(DateTime.now());
-      print("intialDifference: ${initialDifference.inSeconds}");
+      //print("intialDifference: ${initialDifference.inSeconds}");
       // in idle state
       if (initialDifference.isNegative) _isCancelled = true;
       Duration difference = initialDifference;
@@ -28,7 +28,7 @@ class BusArrivalTimerBloc
 
         await Future.delayed(Duration(seconds: 2));
         difference = event.eta.difference(DateTime.now());
-        print("difference: ${difference.inSeconds}");
+        //print("difference: ${difference.inSeconds}");
         if (difference.isNegative || _isCancelled) {
           break;
         }
@@ -46,7 +46,7 @@ class BusArrivalTimerBloc
             eta: event.eta,
             busService: event.busNumber,
             svcOperator: event.svcOperator));
-        await Future.delayed(Duration(seconds: 30));
+        await Future.delayed(Duration(seconds: 10)); //show for 10 seconds
       }
       emit(BusArrivalTimerIdleState());
     });
@@ -67,8 +67,9 @@ class BusArrivalTimerBloc
         eta: eta,
         busService: busService,
         svcOperator: svcOperator,
-        arrivalRatio: arrivalRatio);
-    busyState.isHydrated = true;
+        arrivalRatio: arrivalRatio,
+        isHydrated: true);
+
     return busyState;
   }
 

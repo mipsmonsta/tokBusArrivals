@@ -1,0 +1,11 @@
+Use your phone to find the nearby bus stops. To enable this feature, remember to allow the "location" permission when using the app.
+
+Your current location will be compared to the 5000+ bus stop coordiates island-wide to find the nearest one.
+
+Once found, the bus arrival times of these bus stops will be called up based on the bus stop. 
+
+Steps:
+
+(1) Use the dropdown menu and select "Nearby bus stop".
+(2) Give permissions for "locations".
+(3) Wait for the result.
