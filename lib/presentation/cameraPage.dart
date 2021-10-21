@@ -41,9 +41,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       Future.delayed(Duration(seconds: 5)).then((_) {
         //hide bus stop pole image after 5 seconds
-        setState(() {
-          _busPoleVisibility = false;
-        });
+        if (mounted) {
+          setState(() {
+            _busPoleVisibility = false;
+          });
+        }
+      
       });
     });
   }
@@ -225,15 +228,14 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
     try {
       await _controller.initialize();
+      if (mounted) {
+        _startStreaming();
+        setState(() {
+          _controllerInitialized = true;
+        });
+      }
     } on CameraException catch (e) {
       print(e);
-    }
-
-    if (mounted) {
-      _startStreaming();
-      setState(() {
-        _controllerInitialized = true;
-      });
     }
   }
 
