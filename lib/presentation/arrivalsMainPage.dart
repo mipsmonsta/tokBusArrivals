@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:intl/intl.dart';
 import 'package:meta_bus_arrivals_api/meta_bus_arrivals_api.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -71,11 +72,20 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
     //Prepare Bus Stop Hive
     context.read<StopsHiveBloc>().add(StopsHiveCheckLoadedEvent());
 
-    // check whether to show tutorial
+    // check whether to show tutorial or in-app rating
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
-      bool isFirstUse = await Utility.isFirstUse();
-      if (isFirstUse) {
-        UtilityDialog.showTutorialDialog(context);
+      bool equalCount =
+          await Utility.recordAndCheckUseCountEqual(20); //twenty times
+      if (!(await Utility.isRated()) && equalCount) {
+        final InAppReview inAppReview = InAppReview.instance;
+        Utility.setRated();
+        inAppReview.requestReview();
+      } else {
+        // tutorial
+        bool isFirstUse = await Utility.isFirstUse();
+        if (isFirstUse) {
+          UtilityDialog.showTutorialDialog(context);
+        }
       }
     });
   }

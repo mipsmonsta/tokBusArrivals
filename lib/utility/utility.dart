@@ -91,4 +91,36 @@ class Utility {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('first_use', false);
   }
+
+  //************For In App Review ***************************/
+  static Future<SharedPreferences> _recordUseCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var useCount = prefs.getInt('use_count') ?? 0;
+    prefs.setInt('use_count', useCount + 1);
+    return prefs;
+  }
+
+  static Future<bool> recordAndCheckUseCountEqual(
+      int equalCountAfterRecord) async {
+    bool result = false;
+    SharedPreferences prefs = await Utility._recordUseCount();
+    int useCount = prefs.getInt('use_count') ?? 0;
+    print("Usecount: $useCount");
+    if (useCount == equalCountAfterRecord) {
+      result = true;
+    }
+    return result;
+  }
+
+  static Future<bool> isRated() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('rated') ?? false;
+  }
+
+  static void setRated() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('rated', true);
+  }
+
+  //***********************************************************/
 }
