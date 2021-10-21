@@ -33,10 +33,8 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       if (!mounted) {
         return;
       }
-
-      _startStreaming();
-
       setState(() => _controllerInitialized = true);
+      _startStreaming();
     });
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       Future.delayed(Duration(seconds: 5)).then((_) {
@@ -46,7 +44,6 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
             _busPoleVisibility = false;
           });
         }
-      
       });
     });
   }
@@ -229,9 +226,9 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     try {
       await _controller.initialize();
       if (mounted) {
-        _startStreaming();
         setState(() {
           _controllerInitialized = true;
+          _startStreaming();
         });
       }
     } on CameraException catch (e) {

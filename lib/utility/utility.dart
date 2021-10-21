@@ -105,7 +105,7 @@ class Utility {
     bool result = false;
     SharedPreferences prefs = await Utility._recordUseCount();
     int useCount = prefs.getInt('use_count') ?? 0;
-    print("Usecount: $useCount");
+    //print("Usecount: $useCount");
     if (useCount == equalCountAfterRecord) {
       result = true;
     }

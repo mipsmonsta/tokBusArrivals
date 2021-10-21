@@ -48,11 +48,14 @@ void main() async {
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
 
-  runApp(MyApp());
+  runApp(MyApp(cameras));
 }
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
+  final List<CameraDescription> cameras;
+  MyApp(this.cameras);
 
   MaterialBanner getIsMuteMaterialBanner(BuildContext context) {
     return MaterialBanner(
