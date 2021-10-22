@@ -120,7 +120,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   }
 
   Future<bool> _onWillPop() {
-    _controller.stopImageStream();
+    //_controller.stopImageStream();
     Navigator.of(context).pop(_textToShow);
     return Future.value(true);
   }

@@ -465,199 +465,204 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown
     ]); // limit to portrait
-    return SafeArea(
-      child: Scaffold(
-        resizeToAvoidBottomInset:
-            false, //avoid scaffold content resize and overflow at bottom when keyboard is out
-        appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title
-          title: Text("Bus Arrivals @ Stop"),
-          actions: [
-            IconButton(
-                icon: const Icon(Icons.camera),
-                onPressed: () async {
-                  // String? code =
-                  //     await Navigator.of(context).pushNamed("/camera");
-                  var code = await Navigator.of(context).pushNamed("/camera");
-                  if (code != null && (code as String).length > 0) {
-                    _showOnBusTextFieldAndSearch(code);
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: SafeArea(
+        child: Scaffold(
+          resizeToAvoidBottomInset:
+              false, //avoid scaffold content resize and overflow at bottom when keyboard is out
+          appBar: AppBar(
+            // Here we take the value from the MyHomePage object that was created by
+            // the App.build method, and use it to set our appbar title
+
+            title: Text("Bus Arrivals @ Stop"),
+            actions: [
+              IconButton(
+                  icon: const Icon(Icons.camera),
+                  onPressed: () async {
+                    // String? code =
+                    //     await Navigator.of(context).pushNamed("/camera");
+                    var code = await Navigator.of(context).pushNamed("/camera");
+                    if (code != null && (code as String).length > 0) {
+                      _showOnBusTextFieldAndSearch(code);
+                    }
+                  }),
+              _getPopupMenuButton(context),
+            ],
+          ),
+          floatingActionButton: _speechEnabled
+              ? FloatingActionButton(
+                  backgroundColor: _isSpeechListening
+                      ? Colors.amber
+                      : Colors.amber.withAlpha(150),
+                  child: Icon(_isSpeechListening ? Icons.mic : Icons.mic_off),
+                  onPressed: () async {
+                    //stop any speech annoucements so as not to
+                    //intefere with the speech recognition
+                    context
+                        .read<SpeechReadingBloc>()
+                        .add(SpeechStopReadingEvent());
+
+                    await Future.delayed(Duration(seconds: 1));
+                    _isSpeechListening ? _stopListening() : _startListening();
+                  })
+              : null,
+          body: BlocListener<StopsHiveBloc, StopsHiveState>(
+            listener: (ctx, state) {
+              if (state is StopsHiveNotLoadedState) {
+                _isBusStopDBLoaded = false;
+              } else if (state is StopsHiveLoadedState) {
+                _isBusStopDBLoaded = true;
+              }
+            },
+            child: BlocListener<ArrivalsQueryBloc, ArrivalsQueryState>(
+                listener: (context, state) {
+                  if (state is ArrivalsQueryStateSuccess) {
+                    var services = state.services;
+                    var preparedSpeech = _createSpeechFromServices(services);
+
+                    context
+                        .read<SpeechReadingBloc>()
+                        .add(SpeechStartLoadingReadingEvent(preparedSpeech));
                   }
-                }),
-            _getPopupMenuButton(context),
-          ],
-        ),
-        floatingActionButton: _speechEnabled
-            ? FloatingActionButton(
-                backgroundColor: _isSpeechListening
-                    ? Colors.amber
-                    : Colors.amber.withAlpha(150),
-                child: Icon(_isSpeechListening ? Icons.mic : Icons.mic_off),
-                onPressed: () async {
-                  //stop any speech annoucements so as not to
-                  //intefere with the speech recognition
-                  context
-                      .read<SpeechReadingBloc>()
-                      .add(SpeechStopReadingEvent());
-
-                  await Future.delayed(Duration(seconds: 1));
-                  _isSpeechListening ? _stopListening() : _startListening();
-                })
-            : null,
-        body: BlocListener<StopsHiveBloc, StopsHiveState>(
-          listener: (ctx, state) {
-            if (state is StopsHiveNotLoadedState) {
-              _isBusStopDBLoaded = false;
-            } else if (state is StopsHiveLoadedState) {
-              _isBusStopDBLoaded = true;
-            }
-          },
-          child: BlocListener<ArrivalsQueryBloc, ArrivalsQueryState>(
-              listener: (context, state) {
-                if (state is ArrivalsQueryStateSuccess) {
-                  var services = state.services;
-                  var preparedSpeech = _createSpeechFromServices(services);
-
-                  context
-                      .read<SpeechReadingBloc>()
-                      .add(SpeechStartLoadingReadingEvent(preparedSpeech));
-                }
-              },
-              child: Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Card(
-                        margin: EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _getCompoundBusCodeTextField(context),
-                            const SizedBox(height: 8.0),
-                          ],
-                        ),
-                      ),
-                      BlocBuilder<BookMarkCubit, List<BookMark>>(
-                          builder: (context, state) {
-                        if (state.length == 0) return SizedBox.shrink();
-                        return Card(
-                          color: Colors.amber[200],
-                          margin: const EdgeInsets.all(8.0),
+                },
+                child: Center(
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Card(
+                          margin: EdgeInsets.all(8.0),
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              const SizedBox(
-                                height: 8.0,
-                              ),
-                              Center(child: Text("Bookmarks")),
-                              BookMarkPageView(
-                                width: MediaQuery.of(context).size.width,
-                                height: 60.0,
-                                bookmarkCodeList: List<String>.generate(
-                                    state.length,
-                                    (index) => state[index].busStopCode),
-                                onBookMarkPressedCallback: _onBookMarkPressed,
-                                onBookMarkLongPressedCallback:
-                                    _onBooKMarkLongPressed,
-                              ),
+                              _getCompoundBusCodeTextField(context),
+                              const SizedBox(height: 8.0),
                             ],
                           ),
-                        );
-                      }),
-                      BlocConsumer<BusArrivalTimerBloc, BusArrivalTimerState>(
-                          builder: (context, state) {
-                        late DateTime eta;
-                        late String svcOperator;
-                        late String busNumber;
-                        double completion = 1.0;
-                        if (state is BusArrivalTimerIdleState)
-                          return SizedBox.shrink();
-                        else if (state is BusArrivalTimerDoneState) {
-                          eta = state.eta;
-                          busNumber = state.busService;
-                          svcOperator = state.svcOperator;
-                        } else if (state is BusArrivalTimerBusyState) {
-                          eta = state.eta;
-                          busNumber = state.busService;
-                          svcOperator = state.svcOperator;
-                          completion = state.arrivalRatio;
-                          if (state.isHydrated) {
-                            //call event to start timer
-                            context.read<BusArrivalTimerBloc>().add(
-                                BusArrivalTimerStartEvent(
-                                    eta: state.eta,
-                                    busNumber: state.busService,
-                                    svcOperator: state.svcOperator));
-                          }
-                        }
-
-                        return Card(
-                            color: Colors.white,
+                        ),
+                        BlocBuilder<BookMarkCubit, List<BookMark>>(
+                            builder: (context, state) {
+                          if (state.length == 0) return SizedBox.shrink();
+                          return Card(
+                            color: Colors.amber[200],
                             margin: const EdgeInsets.all(8.0),
-                            child: BusTimer(
-                              width: MediaQuery.of(context).size.width,
-                              height: 110.0,
-                              busNumber: busNumber,
-                              svcOperator: svcOperator,
-                              eta: eta,
-                              completion: completion,
-                              onPressedClosed: _onTimerPressedClose,
-                            ));
-                      }, listener: (context, state) {
-                        if (state is BusArrivalTimerDoneState) {
-                          context.read<VibrationCubit>().startVibration();
-                        }
-                      }),
-                      const SizedBox(height: 8.0),
-                      BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
-                        builder: (context, state) {
-                          Widget resultWidget;
-                          switch (state.runtimeType) {
-                            case ArrivalsQueryStateLoading:
-                              resultWidget =
-                                  Center(child: CircularProgressIndicator());
-                              break;
-
-                            case ArrivalsQueryStateError:
-                              var errorText =
-                                  (state as ArrivalsQueryStateError).error;
-                              resultWidget = Center(
-                                  child: Text(
-                                      "Error Getting Arrivals: $errorText"));
-                              break;
-
-                            case ArrivalsQueryStateSuccess:
-                              var services =
-                                  (state as ArrivalsQueryStateSuccess).services;
-
-                              resultWidget =
-                                  getListViewBasedOnServices(services);
-                              break;
-                            case ArrivalsQueryStateEmpty:
-                            default:
-                              resultWidget = Expanded(
-                                child: Opacity(
-                                  opacity: 0.6,
-                                  child: Stack(children: [
-                                    Center(
-                                        child: FloatingHotAirAnimatedImage()),
-                                    Positioned(
-                                        top: 8.0,
-                                        left: 8.0,
-                                        child: Text("Empty like the wind...",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold)))
-                                  ]),
+                            child: Column(
+                              children: [
+                                const SizedBox(
+                                  height: 8.0,
                                 ),
-                              );
-
-                              break;
+                                Center(child: Text("Bookmarks")),
+                                BookMarkPageView(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 60.0,
+                                  bookmarkCodeList: List<String>.generate(
+                                      state.length,
+                                      (index) => state[index].busStopCode),
+                                  onBookMarkPressedCallback: _onBookMarkPressed,
+                                  onBookMarkLongPressedCallback:
+                                      _onBooKMarkLongPressed,
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        BlocConsumer<BusArrivalTimerBloc, BusArrivalTimerState>(
+                            builder: (context, state) {
+                          late DateTime eta;
+                          late String svcOperator;
+                          late String busNumber;
+                          double completion = 1.0;
+                          if (state is BusArrivalTimerIdleState)
+                            return SizedBox.shrink();
+                          else if (state is BusArrivalTimerDoneState) {
+                            eta = state.eta;
+                            busNumber = state.busService;
+                            svcOperator = state.svcOperator;
+                          } else if (state is BusArrivalTimerBusyState) {
+                            eta = state.eta;
+                            busNumber = state.busService;
+                            svcOperator = state.svcOperator;
+                            completion = state.arrivalRatio;
+                            if (state.isHydrated) {
+                              //call event to start timer
+                              context.read<BusArrivalTimerBloc>().add(
+                                  BusArrivalTimerStartEvent(
+                                      eta: state.eta,
+                                      busNumber: state.busService,
+                                      svcOperator: state.svcOperator));
+                            }
                           }
 
-                          return resultWidget;
-                        },
-                      ),
-                    ]),
-              )),
+                          return Card(
+                              color: Colors.white,
+                              margin: const EdgeInsets.all(8.0),
+                              child: BusTimer(
+                                width: MediaQuery.of(context).size.width,
+                                height: 110.0,
+                                busNumber: busNumber,
+                                svcOperator: svcOperator,
+                                eta: eta,
+                                completion: completion,
+                                onPressedClosed: _onTimerPressedClose,
+                              ));
+                        }, listener: (context, state) {
+                          if (state is BusArrivalTimerDoneState) {
+                            context.read<VibrationCubit>().startVibration();
+                          }
+                        }),
+                        const SizedBox(height: 8.0),
+                        BlocBuilder<ArrivalsQueryBloc, ArrivalsQueryState>(
+                          builder: (context, state) {
+                            Widget resultWidget;
+                            switch (state.runtimeType) {
+                              case ArrivalsQueryStateLoading:
+                                resultWidget =
+                                    Center(child: CircularProgressIndicator());
+                                break;
+
+                              case ArrivalsQueryStateError:
+                                var errorText =
+                                    (state as ArrivalsQueryStateError).error;
+                                resultWidget = Center(
+                                    child: Text(
+                                        "Error Getting Arrivals: $errorText"));
+                                break;
+
+                              case ArrivalsQueryStateSuccess:
+                                var services =
+                                    (state as ArrivalsQueryStateSuccess)
+                                        .services;
+
+                                resultWidget =
+                                    getListViewBasedOnServices(services);
+                                break;
+                              case ArrivalsQueryStateEmpty:
+                              default:
+                                resultWidget = Expanded(
+                                  child: Opacity(
+                                    opacity: 0.6,
+                                    child: Stack(children: [
+                                      Center(
+                                          child: FloatingHotAirAnimatedImage()),
+                                      Positioned(
+                                          top: 8.0,
+                                          left: 8.0,
+                                          child: Text("Empty like the wind...",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold)))
+                                    ]),
+                                  ),
+                                );
+
+                                break;
+                            }
+
+                            return resultWidget;
+                          },
+                        ),
+                      ]),
+                )),
+          ),
         ),
       ),
     );
