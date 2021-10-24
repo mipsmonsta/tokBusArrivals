@@ -90,6 +90,7 @@ flutter:
     - assets/images/nothing_to_see.png
     - assets/images/nothing_to_see_cloud.png
     - assets/images/bus_timer_indicator.png
+    - assets/images/bus_stop_marker.png
     - assets/google_fonts/
     # tutorials related files
     - assets/tutorials/images/feature_find.png

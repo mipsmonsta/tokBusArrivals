@@ -424,7 +424,8 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                       children: [
                         TextSpan(
                             text: _busStopDescription[1],
-                            style: Theme.of(context).textTheme.bodyText2)
+                            style: Theme.of(context).textTheme.bodyText2
+                            )
                       ]),
                 ),
         ),

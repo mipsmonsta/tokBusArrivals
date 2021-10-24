@@ -20,22 +20,42 @@ class _MapMyBusPageState extends State<MapMyBusPage> {
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments as MapPageArguments;
-    
+
     return SafeArea(
         child: Scaffold(
             appBar: AppBar(
               title: Text("Map my bus stop"),
             ),
             body: FlutterMap(
-                options: MapOptions(center: LatLng(args.lat, args.long)),
+                options: MapOptions(
+                  center: LatLng(args.lat, args.long),
+                  minZoom: 13,
+                  maxZoom: 18,
+                  zoom: 16,
+                  interactiveFlags: InteractiveFlag.pinchZoom,
+                ),
                 layers: [
                   TileLayerOptions(
-                      minZoom: 1,
+                      minZoom: 13,
                       maxZoom: 18,
                       backgroundColor: Colors.black,
                       urlTemplate:
                           'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      subdomains: ['a', 'b', 'c'])
+                      subdomains: ['a', 'b', 'c']),
+                  MarkerLayerOptions(markers: [
+                    Marker(
+                        width: 40,
+                        height: 40,
+                        point: LatLng(args.lat, args.long),
+                        builder: (BuildContext context) {
+                          return Container(
+                              width: 40,
+                              height: 40,
+                              child: Image(
+                                  image: AssetImage(
+                                      "assets/images/bus_stop_marker.png")));
+                        })
+                  ])
                 ])));
   }
 }
