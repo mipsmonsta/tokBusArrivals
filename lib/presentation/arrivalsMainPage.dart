@@ -415,7 +415,10 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                   text: TextSpan(
                       text: _busStopDescription[0],
                       style: Theme.of(context).textTheme.bodyText2?.merge(
-                          TextStyle(decoration: TextDecoration.underline)),
+                          TextStyle(
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.blue[900],
+                              decorationThickness: 2.0)),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
                           Navigator.of(context).pushNamed('/map',
@@ -424,8 +427,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                       children: [
                         TextSpan(
                             text: _busStopDescription[1],
-                            style: Theme.of(context).textTheme.bodyText2
-                            )
+                            style: Theme.of(context).textTheme.bodyText2)
                       ]),
                 ),
         ),

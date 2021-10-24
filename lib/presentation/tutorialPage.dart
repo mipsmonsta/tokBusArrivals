@@ -88,6 +88,11 @@ class _TutorialPageState extends State<TutorialPage> {
         'assets/tutorials/contents/feature_find.txt',
       ],
       [
+        'assets/tutorials/captions/feature_map.txt',
+        'assets/tutorials/images/feature_map.png',
+        'assets/tutorials/contents/feature_map.txt',
+      ],
+      [
         'assets/tutorials/captions/feature_timer.txt',
         'assets/tutorials/images/feature_timer.png',
         'assets/tutorials/contents/feature_timer.txt',

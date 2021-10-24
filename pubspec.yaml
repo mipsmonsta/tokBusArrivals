@@ -98,16 +98,19 @@ flutter:
     - assets/tutorials/images/feature_scan.png
     - assets/tutorials/images/feature_speak.png
     - assets/tutorials/images/feature_timer.png
+    - assets/tutorials/images/feature_map.png
     - assets/tutorials/captions/feature_find.txt
     - assets/tutorials/captions/feature_hear.txt
     - assets/tutorials/captions/feature_scan.txt
     - assets/tutorials/captions/feature_speak.txt
     - assets/tutorials/captions/feature_timer.txt
+    - assets/tutorials/captions/feature_map.txt
     - assets/tutorials/contents/feature_find.txt
     - assets/tutorials/contents/feature_hear.txt
     - assets/tutorials/contents/feature_scan.txt
     - assets/tutorials/contents/feature_speak.txt
     - assets/tutorials/contents/feature_timer.txt
+    - assets/tutorials/contents/feature_map.txt
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -1,0 +1,7 @@
+To see the location map for the bus stop:
+
+(1) Click on the underlined text that is the bus stop description (shown in top red box).
+
+(2) Map will launch and you can pinch zoom or pan to see the locality of the bus stop and surroundings.
+
+Information: Singapore map based on Open Street Map. 
