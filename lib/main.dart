@@ -18,6 +18,7 @@ import 'package:tokbusarrival/cubit/bookMarkCubit.dart';
 import 'package:tokbusarrival/cubit/vibrationCubit.dart';
 import 'package:tokbusarrival/hive/StopsAdapter.dart';
 import 'package:tokbusarrival/presentation/arrivalsMainPage.dart';
+import 'package:tokbusarrival/presentation/mapMyBusPage.dart';
 import 'package:tokbusarrival/presentation/speechSettingsPage.dart';
 import 'package:tokbusarrival/presentation/tutorialPage.dart';
 import 'package:tokbusarrival/utility/utility.dart';
@@ -111,9 +112,10 @@ class MyApp extends StatelessWidget {
                 ],
                 child: ArrivalsMainPage(),
               ),
-          '/settings': (_) => SpeechSettingsPage(),
+          '/settings': (_) => const SpeechSettingsPage(),
           '/camera': (_) => CameraPage(cameras: cameras),
-          '/tutorial': (_) => TutorialPage(),
+          '/tutorial': (_) => const TutorialPage(),
+          '/map': (_) => const MapMyBusPage(),
         },
       ),
     );

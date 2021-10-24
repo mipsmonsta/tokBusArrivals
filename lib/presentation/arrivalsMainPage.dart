@@ -1,4 +1,5 @@
 import 'package:bus_stops/bus_stops.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,6 +23,7 @@ import 'package:tokbusarrival/bloc/stopsHiveEvent.dart';
 import 'package:tokbusarrival/bloc/stopsHiveState.dart';
 import 'package:tokbusarrival/cubit/bookMarkCubit.dart';
 import 'package:tokbusarrival/cubit/vibrationCubit.dart';
+import 'package:tokbusarrival/presentation/mapMyBusPage.dart';
 import 'package:tokbusarrival/utility/constants.dart';
 import 'package:tokbusarrival/utility/utility.dart';
 import 'package:tokbusarrival/widget/SayDigitsSnackBar.dart';
@@ -59,7 +61,8 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
   bool _speechEnabled = false;
   bool _isSpeechListening = false;
   bool _isBusStopDBLoaded = false;
-  String _busStopDescription = HINTBUSTEXTFIELD;
+  List<String> _busStopDescription = [HINTBUSTEXTFIELD];
+  MapPageArguments? _busStopMapPageArguments;
 
   TextEditingController _textEditingController = TextEditingController();
 
@@ -152,12 +155,18 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
       Stop? busStop = await context.read<StopsHiveBloc>().box.get(code);
       String? busStopDesc = busStop?.description;
       String? busStopRoadName = busStop?.roadName;
-      if (busStopDesc != null) {
-        _busStopDescription = "$busStopDesc along $busStopRoadName";
-      } else
-        _busStopDescription = HINTBUSTEXTFIELD;
-    } else
-      _busStopDescription = HINTBUSTEXTFIELD;
+      if (busStop != null) {
+        _busStopDescription = ["$busStopDesc", " along $busStopRoadName"];
+        _busStopMapPageArguments =
+            MapPageArguments(busStop.latitude, busStop.longitude);
+      } else {
+        _busStopDescription = [HINTBUSTEXTFIELD];
+        _busStopMapPageArguments = null;
+      }
+    } else {
+      _busStopDescription = [HINTBUSTEXTFIELD];
+      _busStopMapPageArguments = null;
+    }
 
     setState(() {}); //for _busStopDescription
   }
@@ -400,10 +409,24 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
         Container(
           margin: EdgeInsets.only(left: 16.0),
           alignment: Alignment.centerLeft,
-          child: Text(
-            _busStopDescription,
-            textAlign: TextAlign.left,
-          ),
+          child: (_busStopDescription.length == 1)
+              ? Text(_busStopDescription[0])
+              : RichText(
+                  text: TextSpan(
+                      text: _busStopDescription[0],
+                      style: Theme.of(context).textTheme.bodyText2?.merge(
+                          TextStyle(decoration: TextDecoration.underline)),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.of(context).pushNamed('/map',
+                              arguments: _busStopMapPageArguments);
+                        },
+                      children: [
+                        TextSpan(
+                            text: _busStopDescription[1],
+                            style: Theme.of(context).textTheme.bodyText2)
+                      ]),
+                ),
         ),
         const SizedBox(height: 8.0),
         Row(
