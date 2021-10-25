@@ -8,9 +8,63 @@ class TutorialPage extends StatefulWidget {
   _TutorialPageState createState() => _TutorialPageState();
 }
 
-class _TutorialPageState extends State<TutorialPage> {
+class _TutorialPageState extends State<TutorialPage>
+    with TickerProviderStateMixin {
   PageController pageController = PageController();
+  TabController? tabController;
   final double padding = 16.0;
+  var _files = [
+    [
+      'assets/tutorials/captions/feature_hear.txt',
+      'assets/tutorials/images/feature_hear.png',
+      'assets/tutorials/contents/feature_hear.txt',
+    ],
+    [
+      'assets/tutorials/captions/feature_speak.txt',
+      'assets/tutorials/images/feature_speak.png',
+      'assets/tutorials/contents/feature_speak.txt',
+    ],
+    [
+      'assets/tutorials/captions/feature_scan.txt',
+      'assets/tutorials/images/feature_scan.png',
+      'assets/tutorials/contents/feature_scan.txt',
+    ],
+    [
+      'assets/tutorials/captions/feature_find.txt',
+      'assets/tutorials/images/feature_find.png',
+      'assets/tutorials/contents/feature_find.txt',
+    ],
+    [
+      'assets/tutorials/captions/feature_map.txt',
+      'assets/tutorials/images/feature_map.png',
+      'assets/tutorials/contents/feature_map.txt',
+    ],
+    [
+      'assets/tutorials/captions/feature_timer.txt',
+      'assets/tutorials/images/feature_timer.png',
+      'assets/tutorials/contents/feature_timer.txt',
+    ],
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    tabController = TabController(length: _files.length, vsync: this);
+    pageController.addListener(_updateTabController);
+  }
+
+  void _updateTabController() {
+    tabController?.index = pageController.page!.toInt();
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    pageController.removeListener(_updateTabController);
+
+    super.dispose();
+  }
+
   Widget _createPageWidget(
       String caption, String imagePath, String content, int widgetIndex) {
     return LayoutBuilder(builder: (context, viewportConstraints) {
@@ -66,43 +120,10 @@ class _TutorialPageState extends State<TutorialPage> {
   }
 
   List<Widget> _pageChildren() {
-    var files = [
-      [
-        'assets/tutorials/captions/feature_hear.txt',
-        'assets/tutorials/images/feature_hear.png',
-        'assets/tutorials/contents/feature_hear.txt',
-      ],
-      [
-        'assets/tutorials/captions/feature_speak.txt',
-        'assets/tutorials/images/feature_speak.png',
-        'assets/tutorials/contents/feature_speak.txt',
-      ],
-      [
-        'assets/tutorials/captions/feature_scan.txt',
-        'assets/tutorials/images/feature_scan.png',
-        'assets/tutorials/contents/feature_scan.txt',
-      ],
-      [
-        'assets/tutorials/captions/feature_find.txt',
-        'assets/tutorials/images/feature_find.png',
-        'assets/tutorials/contents/feature_find.txt',
-      ],
-      [
-        'assets/tutorials/captions/feature_map.txt',
-        'assets/tutorials/images/feature_map.png',
-        'assets/tutorials/contents/feature_map.txt',
-      ],
-      [
-        'assets/tutorials/captions/feature_timer.txt',
-        'assets/tutorials/images/feature_timer.png',
-        'assets/tutorials/contents/feature_timer.txt',
-      ],
-    ];
-
     return List.generate(
-        files.length,
+        _files.length,
         (index) => _createPageWidget(
-            files[index][0], files[index][1], files[index][2], index));
+            _files[index][0], _files[index][1], _files[index][2], index));
   }
 
   Future<String> _getStringFromFilePath(String path) async {
@@ -127,6 +148,10 @@ class _TutorialPageState extends State<TutorialPage> {
             icon: Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
+          Positioned.fill(
+              child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: TabPageSelector(controller: tabController))),
         ]),
       ),
     );
