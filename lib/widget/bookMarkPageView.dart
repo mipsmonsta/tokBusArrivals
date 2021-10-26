@@ -53,26 +53,50 @@ class BookMarkPageView extends StatelessWidget {
     return Colors.white;
   }
 
+  Widget _getImageCloseButton(Function(int) closedPressed, int index) {
+    return ClipOval(
+        child: Material(
+      color: Colors.amber, // Button color
+      child: InkWell(
+        splashColor: Colors.black, // Splash color
+        onTap: () {
+          closedPressed(index);
+        },
+        child: SizedBox(
+            width: 24.0,
+            height: 24.0,
+            child: Icon(Icons.close, color: Colors.black, size: 18.0)),
+      ),
+    ));
+  }
+
   List<Widget> _viewsFromBookMarkCodeList() {
     return List.generate(
         bookmarkCodeList.length,
         (index) => Center(
             widthFactor: 1.1,
             heightFactor: 1.1,
-            child: OutlinedButton(
-              style: ButtonStyle(
-                backgroundColor:
-                    MaterialStateProperty.resolveWith(_getBackgroundColor),
-                foregroundColor:
-                    MaterialStateProperty.resolveWith(_getForegroundColor),
+            child: Stack(clipBehavior: Clip.none, children: [
+              OutlinedButton(
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.resolveWith(_getBackgroundColor),
+                  foregroundColor:
+                      MaterialStateProperty.resolveWith(_getForegroundColor),
+                ),
+                onPressed: () {
+                  onBookMarkPressedCallback(index);
+                },
+                onLongPress: () {
+                  onBookMarkLongPressedCallback(index);
+                },
+                child: Text(bookmarkCodeList[index]),
               ),
-              onPressed: () {
-                onBookMarkPressedCallback(index);
-              },
-              onLongPress: () {
-                onBookMarkLongPressedCallback(index);
-              },
-              child: Text(bookmarkCodeList[index]),
-            )));
+              Positioned(
+                  child: _getImageCloseButton(
+                      onBookMarkLongPressedCallback, index),
+                  right: -8.0,
+                  top: -5.0)
+            ])));
   }
 }

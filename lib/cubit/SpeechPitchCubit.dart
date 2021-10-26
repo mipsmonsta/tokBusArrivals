@@ -4,7 +4,7 @@ class SpeechPitchCubit extends HydratedCubit<double> {
   final double max = 2.0;
   final double min = 0.5;
 
-  SpeechPitchCubit() : super(0.5);
+  SpeechPitchCubit() : super(1.0);
 
   void adjustToValue(double value) {
     if (value > max) value = max;
