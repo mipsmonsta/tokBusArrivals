@@ -44,6 +44,11 @@ class _TutorialPageState extends State<TutorialPage>
       'assets/tutorials/images/feature_timer.png',
       'assets/tutorials/contents/feature_timer.txt',
     ],
+    [
+      'assets/tutorials/captions/feature_bookmark.txt',
+      'assets/tutorials/images/feature_bookmark.png',
+      'assets/tutorials/contents/feature_bookmark.txt',
+    ],
   ];
 
   @override
