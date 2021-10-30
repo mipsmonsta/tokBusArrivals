@@ -26,11 +26,11 @@ import 'package:tokbusarrival/cubit/vibrationCubit.dart';
 import 'package:tokbusarrival/presentation/mapMyBusPage.dart';
 import 'package:tokbusarrival/utility/constants.dart';
 import 'package:tokbusarrival/utility/utility.dart';
+import 'package:tokbusarrival/widget/EmptyBusStopAnimatedImage.dart';
 import 'package:tokbusarrival/widget/SayDigitsSnackBar.dart';
 import 'package:tokbusarrival/widget/bookMarkPageView.dart';
 import 'package:tokbusarrival/widget/busTimer.dart';
 import 'package:tokbusarrival/widget/cannotGetNearbyBusStopSnackBar%20copy.dart';
-import 'package:tokbusarrival/widget/floatingHotAirAnimatedImage.dart';
 import 'package:tokbusarrival/widget/locationNASnackBar.dart';
 import 'package:tokbusarrival/widget/minuteTag.dart';
 import 'package:tokbusarrival/widget/operatorBusTypeColorIcon.dart';
@@ -669,7 +669,7 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                                     opacity: 0.6,
                                     child: Stack(children: [
                                       Center(
-                                          child: FloatingHotAirAnimatedImage()),
+                                          child: EmptyBusStopAnimatedImage()),
                                       Positioned(
                                           top: 8.0,
                                           left: 8.0,

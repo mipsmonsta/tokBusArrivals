@@ -58,11 +58,16 @@ class BookMarkPageView extends StatelessWidget {
         child: Material(
       color: Colors.amber, // Button color
       child: InkWell(
-        splashColor: Colors.black, // Splash color
+        splashColor: Colors.black,
+        // Splash color
         onTap: () {
           closedPressed(index);
         },
-        child: SizedBox(
+        child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black.withAlpha(155)),
+              shape: BoxShape.circle,
+            ),
             width: 24.0,
             height: 24.0,
             child: Icon(Icons.close, color: Colors.black, size: 18.0)),
