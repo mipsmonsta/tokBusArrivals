@@ -30,7 +30,7 @@ class BusArrivalTimerBloc
         difference = event.eta.difference(DateTime.now());
         //print("difference: ${difference.inSeconds}");
         if (difference.isNegative || _isCancelled) {
-          break;
+          return;
         }
       } while (difference.inSeconds > 0);
 
@@ -52,36 +52,46 @@ class BusArrivalTimerBloc
     });
 
     on<BusArrivalTimerStopEvent>((_, emit) {
+      emit(BusArrivalTimerIdleState());
       _isCancelled = true;
     });
   }
 
   @override
   BusArrivalTimerState? fromJson(Map<String, dynamic> json) {
-    DateTime eta = DateTime.fromMillisecondsSinceEpoch(json["eta"]);
-    String busService = json["busService"];
-    String svcOperator = json["busOperator"];
-    double arrivalRatio = json["arrivalRatio"];
-    //
-    BusArrivalTimerBusyState busyState = BusArrivalTimerBusyState(
-        eta: eta,
-        busService: busService,
-        svcOperator: svcOperator,
-        arrivalRatio: arrivalRatio,
-        isHydrated: true);
-
-    return busyState;
+    BusArrivalTimerState resultState;
+    if (json["type"] == "busy") {
+      DateTime eta = DateTime.fromMillisecondsSinceEpoch(json["eta"]);
+      String busService = json["busService"];
+      String svcOperator = json["busOperator"];
+      double arrivalRatio = json["arrivalRatio"];
+      //
+      resultState = BusArrivalTimerBusyState(
+          eta: eta,
+          busService: busService,
+          svcOperator: svcOperator,
+          arrivalRatio: arrivalRatio,
+          isHydrated: true);
+    } else {
+      resultState = BusArrivalTimerIdleState();
+    }
+    return resultState;
   }
 
   @override
   Map<String, dynamic>? toJson(BusArrivalTimerState state) {
     if (state is BusArrivalTimerBusyState) {
       return {
+        "type": "busy",
         "busService": state.busService,
         "busOperator": state.svcOperator,
         "eta": state.eta.millisecondsSinceEpoch,
         "arrivalRatio": state.arrivalRatio,
       };
+    } else if (state is BusArrivalTimerIdleState) {
+      // saving idle state allow hydration; bug fix
+      // bugfix: prevent canceled timer to be resurrected on app restart
+      return {"type": "idle"};
     }
     return null;
   }

@@ -598,9 +598,9 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                           late String svcOperator;
                           late String busNumber;
                           double completion = 1.0;
-                          if (state is BusArrivalTimerIdleState)
+                          if (state is BusArrivalTimerIdleState) {
                             return SizedBox.shrink();
-                          else if (state is BusArrivalTimerDoneState) {
+                          } else if (state is BusArrivalTimerDoneState) {
                             eta = state.eta;
                             busNumber = state.busService;
                             svcOperator = state.svcOperator;
@@ -617,6 +617,8 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                                       busNumber: state.busService,
                                       svcOperator: state.svcOperator));
                             }
+                          } else {
+                            return SizedBox.shrink();
                           }
 
                           return Card(
