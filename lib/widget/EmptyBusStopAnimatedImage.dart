@@ -34,24 +34,27 @@ class _EmptyBusStopAnimatedImageState extends State<EmptyBusStopAnimatedImage>
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
+    var carImageWidth =
+        width / 4.0; //set car image width based on screen width on ratio of 1:4
     return Container(
       child: Stack(
         children: [
           Image.asset(EmptyBusStopAnimatedImage.assetBackgroundPathForType()),
           Positioned(
             bottom: -2.0,
-            left: -100.0,
+            left: -carImageWidth,
             child: AnimatedBuilder(
               animation: _animationController,
               builder: (builderContext, child) {
                 return Transform.translate(
                     offset: Offset(
-                        (width + 100.0) * _animationController.value, 0.0),
+                        (width + carImageWidth) * _animationController.value,
+                        0.0),
                     child: child);
               },
               child: Image.asset(
                   EmptyBusStopAnimatedImage.assetForegroundPathForType(),
-                  width: 100.0),
+                  width: carImageWidth),
             ),
           ),
         ],
