@@ -329,8 +329,13 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
   }
 
   void _onTapServiceTimer(DateTime eta, String busNumber, String svcOperator) {
-    context.read<BusArrivalTimerBloc>().add(BusArrivalTimerStartEvent(
-        eta: eta, busNumber: busNumber, svcOperator: svcOperator));
+    context.read<BusArrivalTimerBloc>().add(
+        BusArrivalTimerStopEvent()); //bug fix, ensure if existing timer, will be cancelled first
+    if (context.read<BusArrivalTimerBloc>().state ==
+        BusArrivalTimerIdleState()) {
+      context.read<BusArrivalTimerBloc>().add(BusArrivalTimerStartEvent(
+          eta: eta, busNumber: busNumber, svcOperator: svcOperator));
+    }
   }
 
   void _onTimerPressedClose() {
@@ -609,13 +614,21 @@ class _ArrivalsMainPageState extends State<ArrivalsMainPage>
                             busNumber = state.busService;
                             svcOperator = state.svcOperator;
                             completion = state.arrivalRatio;
-                            if (state.isHydrated) {
-                              //call event to start timer
-                              context.read<BusArrivalTimerBloc>().add(
-                                  BusArrivalTimerStartEvent(
-                                      eta: state.eta,
-                                      busNumber: state.busService,
-                                      svcOperator: state.svcOperator));
+                            if (eta.difference(DateTime.now()).isNegative) {
+                              // bug fix to ensure busy state with negative eta is not shown
+
+                              return SizedBox.shrink();
+                            } else {
+                              // resurrect bloc BusArrivalTimerStartEvent if app is restarted
+                              if (state.isHydrated) {
+                                //call event to start timer
+                                context.read<BusArrivalTimerBloc>().add(
+                                    BusArrivalTimerStartEvent(
+                                        eta: state.eta,
+                                        busNumber: state.busService,
+                                        svcOperator: state.svcOperator));
+                              }
+                              //go to return Card
                             }
                           } else {
                             return SizedBox.shrink();

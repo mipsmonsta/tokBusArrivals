@@ -30,6 +30,7 @@ class BusArrivalTimerBloc
         difference = event.eta.difference(DateTime.now());
         //print("difference: ${difference.inSeconds}");
         if (difference.isNegative || _isCancelled) {
+          emit(BusArrivalTimerIdleState());
           return;
         }
       } while (difference.inSeconds > 0);
