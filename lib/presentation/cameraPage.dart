@@ -57,6 +57,24 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     if (mounted) setState(() => _savedImage = image);
   }
 
+  String? _extractCodeFromText(String text) {
+    if (text.length >= 5) {
+      String code = text.substring(0, 5);
+      if (code.isNumeric()) {
+        return code;
+      } else {
+        //test for Bus Stop Code:65349
+
+        if (text.length >= 19) {
+          code = text.substring(14, 20);
+          print(code);
+          return code;
+        }
+      }
+    }
+    return null;
+  }
+
   void _tryToGetText() async {
     if (_savedImage == null) return;
 
@@ -107,16 +125,14 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
     textDetector.close();
 
-    if (text.length >= 5) {
-      String code = text.substring(0, 5);
-      if (!code.isNumeric()) {
-        return;
-      }
-
-      setState(() {
-        _textToShow = code; //take only first 5 characters
-      });
+    String? code = _extractCodeFromText(text);
+    if (code == null) {
+      return;
     }
+
+    setState(() {
+      _textToShow = code; //take only first 5 characters
+    });
   }
 
   Future<bool> _onWillPop() {
