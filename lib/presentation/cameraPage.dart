@@ -59,16 +59,19 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   String? _extractCodeFromText(String text) {
     if (text.length >= 5) {
-      String code = text.substring(0, 5);
+      String code = text.substring(0, 5); //check for bus stop code from pole
       if (code.isNumeric()) {
         return code;
       } else {
         //test for Bus Stop Code:65349
 
         if (text.length >= 19) {
+          //check for bus stop code from bus stop poster
           code = text.substring(14, 20);
-          print(code);
-          return code;
+          if (code.isNumeric()) {
+            return code;
+          } else
+            return null;
         }
       }
     }
