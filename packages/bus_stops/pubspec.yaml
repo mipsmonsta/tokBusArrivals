@@ -1,6 +1,6 @@
 name: bus_stops
-description: A new Flutter package project.
-version: 0.0.1
+description: A dart program to download and log the changed bus stops from LTA Datamall
+version: 0.0.9
 homepage:
 
 environment:
@@ -11,6 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^0.13.3
+  dart_console: ^1.1.0-pre.0
+  path: ^1.8.0
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:

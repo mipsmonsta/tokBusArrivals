@@ -37,6 +37,7 @@ import 'package:tokbusarrival/widget/operatorBusTypeColorIcon.dart';
 import 'package:tokbusarrival/widget/utilityDialog.dart';
 import '../utility/string_extensions.dart';
 
+
 // add new types for more pop up menu items
 enum PopUpMenuTypes { nearestBus, about, tutorial, settings }
 

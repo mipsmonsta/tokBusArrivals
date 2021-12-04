@@ -75,3 +75,6 @@ build/
 !**/ios/**/default.perspectivev3
 
 keys.dart
+
+# Bus Stop Update Log File created with main.dart
+updateLog.log
