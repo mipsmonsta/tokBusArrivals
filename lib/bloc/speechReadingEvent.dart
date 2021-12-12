@@ -35,3 +35,4 @@ class SpeechStopReadingEvent extends SpeechReadingEvent {
     return this.runtimeType.toString();
   }
 }
+ 
